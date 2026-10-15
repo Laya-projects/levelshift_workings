@@ -1,0 +1,28 @@
+Great, it's all working. Here's the final summary.
+
+## Jenkins + ngrok + GitHub: final summary
+
+**A. Install Jenkins**
+1. Install JDK 21 (Temurin `.msi`) so Jenkins has Java to run on.
+2. `java -version` confirms Java works.
+3. Download the Jenkins LTS Windows `.msi` from jenkins.io and run it, keeping port 8080 and pointing the Java home to the installed JDK folder (not the `.msi` file).
+4. Open `http://localhost:8080` to reach Jenkins.
+5. `type C:\ProgramData\Jenkins\.jenkins\secrets\initialAdminPassword` shows the unlock password.
+6. Install suggested plugins and create your admin user.
+7. **Manage Jenkins → Plugins → Installed plugins**: confirm the GitHub plugin is enabled.
+
+**B. Set up ngrok**
+8. Install ngrok (Microsoft Store or ZIP) and check it with `ngrok version`.
+9. `ngrok config add-authtoken YOUR_TOKEN` links ngrok to your account.
+10. `ngrok http 8080` creates the public tunnel. Copy the `https://...ngrok-free.dev` Forwarding URL and keep this window open.
+
+**C. Connect GitHub to Jenkins**
+11. Repo **Settings → Webhooks → Add webhook**.
+12. Payload URL: `https://<your-ngrok-url>/github-webhook/`, content type `application/json`, event **Just the push event**.
+13. In the Jenkins job, add your repo URL under **Source Code Management → Git**.
+14. Under **Build Triggers**, tick **GitHub hook trigger for GITScm polling** and save.
+15. Push a commit. A green tick in **Recent Deliveries** and an automatic build in Jenkins confirm it works.
+
+**Remember:**
+- Jenkins runs as a Windows service, so it keeps running on its own.
+- ngrok must stay running for webhooks to reach Jenkins. If you restart it and the URL changes, update the webhook's Payload URL (or use a free static domain so it never changes).
