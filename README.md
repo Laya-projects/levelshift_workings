@@ -2,6 +2,10 @@
 
 # Jenkins integrated to git
 
+successfully integrated jenkins with github repo of levelshift_workings
+
+# Python practice
+
 Python practice work and assessments completed as part of my LevelShift training.
 
 ## Project Structure
