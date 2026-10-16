@@ -1,6 +1,6 @@
 # LevelShift Workings
 
-# Jenkins, DOcker and kubernetes integrated to git
+# Jenkins, Docker and kubernetes integrated to git
 
 successfully integrated all three with github repo of levelshift_workings
 
