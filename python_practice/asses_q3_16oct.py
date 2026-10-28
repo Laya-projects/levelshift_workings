@@ -1,5 +1,5 @@
+from collections import Counter, defaultdict, deque
 from functools import wraps
-from collections import deque, Counter, defaultdict
 
 
 def log_call(func):
@@ -146,7 +146,6 @@ def group_anagrams(words):
 def is_balanced(expr):
     stack = []
     matches = {')': '(', ']': '[', '}': '{'}
-    pass
 
 
 def round_robin(tasks, quantum):

@@ -1,4 +1,5 @@
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
+
 
 class Employee(ABC):
     def __init__(self, name, emp_id):
@@ -54,7 +55,7 @@ class Contractor:
 def salary_processing(n):
     payroll = 0
     instance_list =[]
-    for i in range(0,n):
+    for i in range(n):
         desc = input()
         list_desc = list(desc.strip().split())
         type = list_desc[0].lower()

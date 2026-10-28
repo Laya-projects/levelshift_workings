@@ -1,7 +1,8 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 import pickle
+
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
 # Reading the data
 iris = pd.read_csv("iris.csv")

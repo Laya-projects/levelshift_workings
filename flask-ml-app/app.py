@@ -1,7 +1,8 @@
-import numpy as np
-from flask import Flask, request, jsonify, render_template
-import pickle
 import os
+import pickle
+
+import numpy as np
+from flask import Flask, render_template, request
 
 app = Flask(__name__) # Initialize the flask App
 model = pickle.load(open('model.pkl', 'rb')) # Load the trained model
@@ -18,7 +19,7 @@ def predict():
     final_features = [np.array(init_features)]
     prediction = model.predict(final_features) # Make a prediction
 
-    return render_template('index.html', prediction_text='Predicted Species: {}'.format(prediction)) # Render the predicted result
+    return render_template('index.html', prediction_text=f'Predicted Species: {prediction}') # Render the predicted result
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
