@@ -8,11 +8,14 @@ A small, real-shaped e-commerce app that brings together **components, hooks, ro
 
 ## 📸 Preview
 
+ <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/552a273e-7849-498b-b9bb-bc53582d337b" />
 
+<img width="1919" height="1078" alt="image" src="https://github.com/user-attachments/assets/b2077427-e202-42c6-a850-0305d02c4968" />
 
-| Shop | Product Details | Cart | Orders |
-|------|-----------------|------|--------|
-| _screenshot_ | _screenshot_ | _screenshot_ | _screenshot_ |
+<img width="1906" height="1075" alt="image" src="https://github.com/user-attachments/assets/68edbcae-807c-4c60-88a6-ed297c51b31f" />
+
+<img width="1905" height="876" alt="image" src="https://github.com/user-attachments/assets/e3ca7ca2-3c5f-4ef2-92e4-344c1a610cab" />
+
 
 ---
 
