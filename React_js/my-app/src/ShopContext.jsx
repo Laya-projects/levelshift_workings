@@ -1,23 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-// LOCAL DATA - mimics database tables
-const MOCK_PRODUCTS = [
-    { id: 1, name: 'Wireless Headphones', price: 2999, category: 'Electronics', rating: 4.5, img: '🎧' },
-    { id: 2, name: 'Ergonomic Keyboard', price: 4500, category: 'Electronics', rating: 4.7, img: '⌨️' },
-    { id: 3, name: 'Stainless Steel Bottle', price: 1200, category: 'Lifestyle', rating: 4.2, img: '🧴' },
-    { id: 4, name: 'Leather Backpack', price: 3800, category: 'Fashion', rating: 4.6, img: '🎒' },
-    { id: 5, name: 'Smart Fitness Watch', price: 5499, category: 'Electronics', rating: 4.4, img: '⌚' },
-    { id: 6, name: 'Running Sneakers', price: 6200, category: 'Fashion', rating: 4.8, img: '👟' },
-];
-
-// MOCK FETCH - simulates database delay / failure
-const fetchProductsFromDatabase = (shouldFail = false) =>
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (shouldFail) reject(new Error('Database connection timeout. Failed to fetch shop items.'));
-            else resolve(MOCK_PRODUCTS);
-        }, 1500);
-    });
+import { getProducts } from './api/shopApi.js';
 
 const ShopContext = createContext(null);
 
@@ -41,9 +24,14 @@ export function ShopProvider({ children }) {
         setLoading(true);
         setError(null);
         try {
-            setProducts(await fetchProductsFromDatabase(forceFail));
+            if (forceFail) throw new Error('Simulated server crash.');
+            setProducts(await getProducts());
         } catch (err) {
-            setError(err.message);
+            setError(
+                err.message === 'Failed to fetch'
+                    ? 'Cannot reach the server. Is it running on port 3000?'
+                    : err.message
+            );
         } finally {
             setLoading(false);
         }
