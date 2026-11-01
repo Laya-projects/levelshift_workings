@@ -1,8 +1,7 @@
 import os
 import pickle
-import numpy as np
 
-from typing import List
+import numpy as np
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -50,7 +49,7 @@ def predict_single(data: IrisData):
 
 
 @app.post("/predict_batch")
-def predict_batch(data: List[IrisData]):
+def predict_batch(data: list[IrisData]):
     return [predict_iris_species(item) for item in data]
 
 # open the fast api with the following link : http://localhost:8090/docs

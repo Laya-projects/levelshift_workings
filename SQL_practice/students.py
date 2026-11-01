@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, text
 import pandas as pd
+from sqlalchemy import create_engine, text
 
 engine = create_engine("sqlite:///practice.db")
 
@@ -68,10 +68,19 @@ with engine.connect() as conn:
 
 with engine.connect() as conn:
     conn.execute(text("UPDATE students SET marks = 90 WHERE name = 'Asha'"))
-    conn.commit()     # save permanently
+    user_confir= input("are you sure want to update marks of asha? y/n")
+    if user_confir.lower() !='y':
+        conn.rollback()
+    else:
+        conn.commit()     # save permanently
 
 
 df = pd.read_sql("SELECT * FROM students",engine)
 
 print(df)
+
+
+
+
+
 

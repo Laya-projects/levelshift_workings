@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, text
 import pandas as pd
+from sqlalchemy import create_engine, text
 
 engine = create_engine("sqlite:///practice.db")
 
