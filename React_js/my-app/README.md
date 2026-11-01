@@ -2,7 +2,7 @@
 
 A small, real-shaped e-commerce app that brings together **components, hooks, routing, state management, and API/DB calls** in one project. A React frontend talks to an Express REST API backed by a SQLite database.
 
-> **Status:** Frontend ✅ · Backend API ✅ · Database ✅ · Auth 🚧 (planned)
+> **Status:** Frontend ✅ · Backend API ✅ · Database ✅ · 
 
 ---
 
