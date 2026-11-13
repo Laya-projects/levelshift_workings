@@ -1,0 +1,30 @@
+Ingesting data into the DevOps Data Platform:
+
+how the Delphix Continuous Data Engine ingests data from the data sources within your Source Environment(s), and creates dSources.(focusing)
+
+    Once an environment has been added, the Delphix Continuous Data Engine will automatically discover any data sources on the host. 
+
+    The Delphix Continuous Data Engine stays connected to your Source Environment(s). 
+    Each time data is ingested from your Source Environment(s), its data blocks are compressed and stored in the Delphix Continuous Data Engine. When new source data is discovered, rather than ingesting a 1:1 copy of the data, the Continuous Data Engine only ingests and compresses blocks of the new data. 
+    A collection of data blocks are what is referred to as a dSource.
+
+dSource:
+    
+    A dSource is a compressed copy of the source database stored in the Delphix Continuous Data Engine, 
+    along with all incremental updates so that it is kept up to date over time. 
+
+
+A Linked dSource within the Delphix Continuous Data Engine will ingest data from the Source Environment(s) and 
+create a dSource object on the Delphix Continuous Data Engine. 
+As a virtualized representation of your source data, it cannot be managed, manipulated, or examined by database tools.
+
+Important Note:
+    
+    In order to use dSource snapshots, you must create a virtual database (VDB),
+    an independent, writable copy of a dSource snapshot
+
+    Each dSource and VDB has its own record that is represented in the Timeline History, 
+    which is made up of snapshots taken at different points in time.
+
+Delphix Continuous Data Engine User Interface. -- allows us to manage dataset and environment for the datasets through Manage housed
+

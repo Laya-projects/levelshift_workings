@@ -1,0 +1,12 @@
+This process creates a set of directories on the target environment and populates them with the database data, log files, and scripts that are used to recover the physical database.
+
+V2P:
+    This process, referred to as V2P, creates a set of directories in the target environment and populates them with the database data, log files, and scripts that are used to recover the physical database. 
+
+characteristics:
+    Compress, Encrypt, Pause and Resume
+
+    
+
+
+

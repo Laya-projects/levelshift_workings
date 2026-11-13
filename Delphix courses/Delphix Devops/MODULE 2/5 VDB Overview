@@ -1,0 +1,22 @@
+At their core, Virtual Databases (VDBs) are a database provisioned from either a dSource or another VDB which is a full read/write copy of the source data. To end-users, VDBs act and perform just like a standard database.
+
+Components :
+    1. Datasets Page:
+    2. Provisioning
+    3. Provision VDB Wizard(detailed docs on provisioning detail)
+
+An accidental refresh of one or more virtual databases (VDBs) from a source database can remove important data. To correct this situation, users can undo VDB refresh or rewind actions.
+
+Enabling and Disabling Virtual Databases:
+
+    Disabling a VDB is a prerequisite for procedures such as VDB migration or upgrade. Disabling a VDB removes all traces of it, including any configuration files, from the target environment to which it was provisioned. However, the VDB itself, as well as the metadata, will still exist on the engine.
+
+    When you are ready to enable the VDB again, you will see the word 'Enable' instead of Disable in the menu seen above. Once enabled, the VDB will continue to function as it did previously.
+
+Deleting a VDBs:
+
+    Deleting a VDB is an unrecoverable operation. Proceed only if you want to permanently destroy the unique data that was created in the VDB.
+
+    You cannot delete a VDB that has dependencies, as the dependencies rely on the data associated with the snapshot.
+
+

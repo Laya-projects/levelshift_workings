@@ -1,0 +1,23 @@
+Data Control Tower:
+    Data Control Tower (DCT)  provides new approaches to general Delphix workflows, delivering a more streamlined developer experience. 
+
+users must know exactly which engine to target in order to identify and act upon a specific Delphix object—a process that DCT simplifies by providing a centralized orchestration layer and unified API gateway.
+
+Terraform:
+    The Delphix Terraform Provider enales the configuration of Delphix-Sourced data
+    to be sourced into ephemeral infrastructure as part o the Terraform Build process.
+
+ServiceNow:
+    The Delphix ServiceNow Spoke enables a catalog of all Delphix operations that are currently instrumented into DCT.
+
+Central Management with DCT:
+    DCT offers a central management platform for Delphix Administrators to globally monitor system statuses and reports, 
+    perform common Delphix operations from a central User Interface, and enforce, integrate, and automate with enterprise authentication 
+    and authorization standards.
+
+
+
+
+
+
+

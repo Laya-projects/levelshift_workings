@@ -1,0 +1,94 @@
+VDB maintenance involves using documented database upgrade procedures. You can disable your VDB and then perform a standard database upgrade against it. 
+    use cases:  
+        Upgrading a VDB independently from the Source DB
+
+        Refreshing the VDB after the Source DB is upgraded
+
+
+Workflow for independently upgrading a VDB:
+    Put new “brain” on the machine
+    Install the new database software (new version) on the target server where the VDB lives.
+
+    Do the normal upgrade stuff
+    Use the database’s usual upgrade/patch steps (Oracle/SQL Server etc.) on that server, just like you would for a real database.
+
+    Let Delphix re‑look at the machine
+    In Delphix, refresh the target environment so it can “see” the new database installation and services you just added.
+
+    Tell the VDB to use the new version
+    Disable/stop the VDB.
+    Use the Upgrade option to point the VDB’s installation/repository to the new database version.
+
+Workflow for Refreshing a VDB:
+    Think of a VDB as a toy copy of a big Lego city (the source database).
+
+    Upgrade the real city first
+    You change and upgrade the real Lego city (the source database) using its normal upgrade steps.
+
+    Put the new Lego pieces on the toy table
+    Install the new database software (new binaries) on the target server where the VDB lives, so it can understand the upgraded city.
+
+    Let Delphix take a fresh look around
+    In Delphix, you refresh the target environment so it “sees” the new database installation and services you just added.
+
+    Tell the VDB to use the new tools
+
+    Stop/disable the VDB.
+    Use the Upgrade option so the VDB now points to the new database version (same as the upgraded source).
+    Give the toy city a fresh copy of the upgraded world
+
+    In Delphix, choose Refresh VDB.
+    Pick a new snapshot from the source that was taken after the source was upgraded.
+    Delphix then “rebuilds” the VDB from this upgraded snapshot.
+    End result:
+
+    First, the real city gets upgraded.
+    Then the toy copy (VDB) is refreshed so it matches that new upgraded city.
+
+Updating the Oracle_installation:
+    On the VDB Configuration tab, click the stop icon to stop the VDB.
+
+    From the Actions menu (...) select upgrade to switch the ORACLE_INSTALLATION to the new upgrade version same as the dSource.
+
+Refresh the VDB:
+    Navigate to the Datasets view, select the VDB, and then click the Timeflow tab.
+
+    Click the Refresh button.
+
+    Select a new snapshot from the dSource that was taken after the dSource was upgraded. Choosing Faster will use the most recent dSource snapshot.
+
+
+VDB maintenance involves using documented database upgrade procedures. You can disable your VDB and then perform a standard database upgrade against it. 
+
+two use cases associated with upgrading a VDB:
+    1. Upgrading a VDB independently from the source DB
+    2.Refreshing the VDB after the source DB is upgraded 
+
+“Independently upgrading a VDB” = upgrade the VDB itself without upgrading the source.
+
+Very simply, the workflow is:
+
+    Install the new database version/binaries on the target server where the VDB lives.
+
+    Run the normal database upgrade steps on that server (as if it were a physical DB).
+
+    In Delphix, refresh the target environment so Delphix discovers the new installation.
+
+    Disable/stop the VDB, then use the Upgrade action to point the VDB to that new database installation/version.
+
+    Result: the VDB now runs on the new database version, independently of its source.
+
+Migrating a VBD:
+    when upgrading the host on which the VDB resides, or as part of a general data center migration. This is easily accomplished by first disabling the database, then using the Migrate VDB feature to select a new target environment.
+
+ 
+
+
+
+
+
+
+
+
+
+
