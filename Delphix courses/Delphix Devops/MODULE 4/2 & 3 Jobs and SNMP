@@ -1,0 +1,15 @@
+
+JObs:
+    Many operations performed in the Delphix Continuous Data Engine are captured and stored. Delphix Administrators can view a history of activities performed by all users. These activities can be viewed on the Jobs page.
+
+SNMP(simple network management protocol):
+
+    It is a standard protocol for managing devices on IP Networks.
+
+    The Delphix Platform can send SNMP traps to an external SNMP manager, providing basic system-level status such as faults and capacity alerts.
+
+NOTE:  In order for the Delphix SysAdmin to select and setup SNMP as an option under the networking screen on the sysadmin Dashboard of the UI, a network administrator must set up SNMP. 
+
+
+
+

@@ -1,0 +1,33 @@
+Syslog is a widely used standard for message logging. It permits the separation of the software that generates messages, the system that stores them, and the software that reports and analyzes them. 
+
+
+Delphix  supports sending Alerts, Faults, and Audit events through multiple mechanisms, including Syslog, SNMP and email.
+
+Actions:
+    The Actions Sidebar lists both the Running and the Finished Actions that take place on the Delphix Engine.
+
+    types:
+        Running Acions
+        Finished Actions
+
+Errors:
+
+    When an error condition occurs during the execution of an Action, the background color of the action's box becomes red, and the action remains in the top section until it is dismissed.
+
+Audit Logs:
+    Audit logs provide a record of all actions that were initiated by a policy or user, regardless of whether that action was successful. 
+
+     Audit Range options:
+
+        1. Audit Ranges:
+            Audit logs can be filtered by Predefined Ranges or Custom Ranges. The default setting for audit logs is a predefined range of 1 Hour. 
+
+        2. Predefined Ranges:
+            Click on the downward arrow listed next to the default range of 1 Hour to reveal the Predefined Range options. The available Refresh options are 1 Hour, 1 Day, and 1 Week.
+
+        3. Custom Ranges:
+            Clicking on the From and To date boxes will produce a calendar and offers the ability to select dates and time ranges in a number of ways.
+
+
+
+
