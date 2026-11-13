@@ -1,0 +1,88 @@
+Hook Operations:
+    allows you to execute custom Operations at select points 
+    during linking sources and managing virtual
+
+    For example, you may want to prevent your monitoring systems from triggering during VDB startup and shutdown. In this case, you would leverage pre- and post-hooks to run required scripts for VDB start/stop operations.
+
+dsource hooks:
+    Pre sync: operations are executed before a SnapSync of a dSource.
+
+    Post Sync: operations are executed after a SnapSync operation of a dSource.
+
+VDB Hooks:
+    Configure Clone: 
+        Operation performed after intial provisioning and after a refresh
+
+    Pre Refresh: 
+        Operations performed before a refresh.
+        These operations can export or backup data from the Virtual dataset , so that it can be restored after the refresh completes.
+
+    Post Refresh:
+        Operations performed after a refresh
+        after virtual dataset started and configure clone hook
+        This hook will not run if the refresh or Pre Refresh hook operations fails
+    
+    Pre Rollback:
+        Operations performed before a rollback, also known as rewind.
+
+        These operations can export or backup data from the virtual dataset to be restored after the rewind (rollback) completes.
+
+    Post Rollback:
+        Operations performed after a rollback, also known as rewind
+        This hook will not run if the rewind or Pre Rewind hook operations fail.
+
+    Pre Snapshot:
+        Operations performed before a snapshot.
+
+    Post snapshot:
+        Operations performed after a snapshot.
+        This hook will run regardless of the success of the snapshot or Pre Snapshot hook operations.
+
+    Pre start:
+        Operations performed before the startup of a VDB or vFile.
+    
+    Post Start:
+        Operations performed after the startup of a VDB or vFile.
+
+        These operation allows us to clean up any temporary files or restart processes that may have been stopped by pre start hook or log notification
+
+    Pre stop:
+        Operations performed before the shutdown of a VDB or vFile.
+
+    Post Stop:
+        Operations performed after the shutdown of a VDB or vFile.
+
+        These operations can be used to log notifications, clean up any temporary files, or manage related processes.
+    
+Staging Server Hooks:
+    Staging Server hooks are currently applicable to SAP ASE and staged plugins (Db2, HANA, and PostgreSQL) environments, and execute on the configured staging server.
+
+    Pre Validated Sync: Operations performed on a staging server before validated sync.
+
+    Post Validated Sync: Operations performed on a staging server before validating sync
+
+    To edit Hook operations on a dataset, navigate to the Datasets page and select the dataset you would like to edit from the left hand menu. Click on the Configuration tab and then the Hooks Tab. 
+
+    To easily manage hooks across multiple datasets, you can create Hook Templates to apply the same hook to many objects. 
+
+    Exporting a hook template:
+        * In the Datasets panel, select a dataset.
+        * Click the Configuration tab.
+        * Within the Configuration tab, click the Hooks tab.
+        * Select the hook to edit.
+        * Click the Plus icon to add a new operation.
+        * Select the type of operation.
+        * Click the text area and edit the contents of the operation.
+        * Click Export.
+        * Enter a Name for the template.
+        * Enter a Description detailing what the operation does or how to use it.
+        Click Export.
+
+    for tutorial in hooks and hook templates: https://help.delphix.com/cd/current/content/cli_cookbook_hooks_and_hook_templates.htm
+
+
+
+
+
+
+

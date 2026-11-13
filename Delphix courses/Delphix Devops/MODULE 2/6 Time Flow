@@ -1,0 +1,49 @@
+A Timeflow represents the complete historical record of a dataset 
+having both snapshots and the intervening log data, allowing the 
+Delphix Continuous Data Engine to reconstruct the dataset from any 
+specific point in time, enabling precise provisioning, refresh, and 
+rewind operations.
+
+Both dSources and VDBs have Timeflows. This Timeflow data serves as the basis for all Virtual Database storage within Delphix. 
+
+Timeflow uses two mechanisms to provide point in time provisioning:
+
+    Periodic snapshots of the dSource or VDB
+
+    Transactions Log collection for all time between backups
+
+Snapshots are created either via a schedule policy or generated on demand. Snapshots allow you to choose a point in time from which to provision, refresh, or rollback. 
+
+Intial dSource Snapshot:
+    The initial dSource Snapshot creates a snapshot timestamp in the dSource Timeflow.
+
+Data Blocks:
+    In Perforce Delphix (part of the DevOps Data Platform), data blocks (or shared data blocks) refer to the underlying storage units of production data that Delphix virtualizes rather than duplicating
+
+Initial VDB Snapshot:
+    The initial VDB Snapshot creates a Snapshot timestamp in the VDBs Timeflow
+
+Subsequent Snapshots:
+    Subsequent Snapshots capture the state of a dataset at a specific moment in time. 
+
+SnapSync and LogSync and VDB Snapshot:
+
+    For dSources, the dSource snapshots are taken via the Delphix SnapSync service and database logs are collected via the Delphix LogSync service.
+
+    For VDBs, snapshots are taken via the Delphix VDB snapshot service. Database logs are automatically collected if database logging is enabled on VDBs.
+
+SnapSync:
+    The standard process for importing data from a source into the Delphix Continuous Data Engine. An initial SnapSync is performed to create a dSource on the Delphix Continuous Data Engine.
+
+LogSync:
+    This feature enables the ingestion and retention of more granular (log-based) source change data. This more granular change data allows for VDB point-in-time provision, refresh, or rollback.
+
+VDB Snapshot:
+    VDB Snapshots represent the state of a dataset at a specific moment in time. Snapshots are created via scheduled policies or are generated on demand
+    
+
+
+
+
+
+

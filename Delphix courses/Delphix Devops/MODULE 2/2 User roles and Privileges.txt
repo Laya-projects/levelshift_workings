@@ -1,0 +1,35 @@
+Roles and Privileges
+    1. System Administrator:
+        The Delphix System Administrator users are responsible for managing the Delphix Engine itself, 
+        but not the objects (Environments, dSources, VDBs) within the server.
+
+        A user called sysadmin is the default system administrator user. 
+        While this user can be suspended, it may not be deleted
+
+    2. The Delphix Administrator (Admin):
+        The Delphix Administrator can assign privileges to different users.
+        A Delphix user can be marked as a Delphix Administrator. 
+        Special privileges:
+           1. A Delphix user can be marked as a Delphix Administrator. 
+           2. They implicitly have Owner privileges for all Delphix objects.
+           3. They can create new groups and new environments.
+        Delphix Admin users can further create users and assign one of the four predefined types of user roles and
+        assign privileges to them: Owner, Provisioner, Data Operator, and Reader.
+
+        user type: 
+            Owners - acesses, doings like refresh rollbacks , snapshot , start stop and re start.
+            Provisioners - can access data and provision VDBs
+            Data Operator - accessing data operations alone
+            Readers - can access(read only) data only
+
+LDAP (Lightweight Directory Access Protocol):
+    If you intend to validate user logins using the 
+
+
+
+
+
+
+
+
+

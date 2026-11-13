@@ -1,0 +1,21 @@
+Countinuous Data Engine:
+    The Continuous Data Engine is a data management engine that provides the ability to ingest, replicate, 
+    and share datasets.
+    connects with your source database(s) to take in a full readable, writable copy of your data.
+
+User Interface Options for working with Delphix:
+    1. Graphical User Interface
+    2. REST API
+    3. CLI(via Secure SHell)
+    4. Data Control Tower
+    5. DCT Toolkit
+
+Administration of the Delphix Continuous Data Engine is effected through supported product
+interfaces only, like the browser-based UI, Rest API or CLI
+
+Direct System-level Modifications(outside of the supported interfaces) are not supported
+
+
+
+
+

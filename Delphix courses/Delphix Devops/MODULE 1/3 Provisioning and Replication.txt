@@ -1,0 +1,59 @@
+Virtual Data base:
+    you must use that dSource to create a virtual database (VDB), 
+    a process that Delphix refers to as "VDB provisioning".
+
+    At their core, VDBs are fully functional copies of data sources that can be created and managed at a 
+    fraction of the storage and time that is typically required.
+    To end-users, VDBs act and perform just like a standard database.
+
+Delphix Replication:
+    Replication allows you to move Delphix objects such as dSources and Virtual Databases (VDBs) between Delphix Engines.
+    Replication allows you to not just migrate data, but take the important step of backing up your data. 
+    Important note: Replication supports Delphix Engine recovery and DR scenarios - not production source recovery.
+
+As virtual appliances, it is possible to backup, restore, replicate, and migrate data objects between 
+Delphix Engines using features of hypervisor and the underlying storage infrastructure. 
+Data objects include:
+    * Groups
+    *dSources,
+    *VDBs
+
+how hyperviser help in data replications?
+    A hypervisor assists in data replication by managing and copying data at the Virtual Machine (VM) 
+    level rather than the physical hardware level.
+
+
+The Delphix Ecosystem with Replication:
+    Delphix Replication provides asynchronous updates to a remote site, which can be another Delphix Engine in the local datacenter, 
+    in a remote datacenter, or in the Cloud. 
+    As a solution, this provides both backup and disaster recovery in a single technology
+
+
+Selective Data Distribution (SDD):
+
+    Selective Data Distribution permits the distribution of masked data between Delphix Engines. 
+    Selective data distribution is configured on the source Delphix Engine or in the Data Control Tower. 
+    It first copies a subset of masked VDBs to a target Delphix Engine,
+    then sends incremental updates either manually or according to a schedule.
+
+he DxFS (Delphix File System) uses Selective Data Distribution (SDD) to redact the sensitive data from the replication stream, 
+ensuring that only masked or permitted data is replicated to the Non-Production datacenter. 
+With SDD, sensitive data from the dSource never leaves the Production engine, providing protection at both the VDB and replication layers.
+
+Important Note:
+    Only masked VDBs can be added to a Selective Data Distribution spec.
+    and replicated to another engine outside the production zone (dev/test on premise or in the cloud).
+
+selective data distribution is only decides for data repication in dephix?
+
+No, selective data distribution is not the only way to manage data replication in Delphix. 
+It is a specific strategy within a much broader replication architecture designed to protect sensitive data and save bandwidth.
+
+In Delphix, data replication is primarily built around the concept of Replication Profiles. 
+You have full control over what data moves, how it moves, and where it goes using several different methods.
+
+There are some considerations to keep in mind when performing Replication tasks, 
+to ensure that the Replication process is successful:
+    * Failover and conflict resolution
+    * Enabling Databases and Environments
+
