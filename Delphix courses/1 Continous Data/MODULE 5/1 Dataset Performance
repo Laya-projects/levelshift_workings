@@ -1,0 +1,14 @@
+Dataset Performance allows you to monitor the throughput of each object in the Delphix Continuous Data Engine.  
+
+The Timescale options for this quick view are Hour and Day. Hour is the default setting.
+
+you can access the Dataset Performance page one of two ways:
+    1. The Banner:
+        Continuous Data Engine banner, click on the Resources tab and select Dataset Performance.
+
+    2. View link:
+        click on the View link located within the Dataset Performance section of the dashboard
+
+The spikes in data performance graph - the edges are called oracle_mask- this shows detailed information on a particular object or point in time 
+
+Scrolling down toward the bottom of the page shows the list of the objects on the engine and their throughputs

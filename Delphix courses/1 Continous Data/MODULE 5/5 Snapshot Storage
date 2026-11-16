@@ -1,0 +1,109 @@
+Recap:
+    snapshot represents the state of a dataset at a specific moment in time. Snapshots provide consistent provisioning points and can be used to provision VDBs (and to recover/rewind to a point in time within a timeflow).
+
+Current Copy Size and Snapshot Size :
+    Delphix storage evolves over time with dataset changes. From the Storage Capacity view found on the dashboard of the Continuous Data UI, the details of the current storage for a given dataset can be found.
+
+Current Copy Size is less than the size of the source database due to compression in the Continuous Data Engine.
+
+The changes to the dataset are what impact the size of snapshots.
+
+The Delphix snapshot size equals the size of any blocks that are different between that snapshot and the current copy.
+
+Database Updates versus Inserts:
+
+INSERT (adding new rows)
+
+    Tries to use free space in existing blocks first.
+    Only when blocks are full are new blocks allocated.
+    Often increases the Current Copy Size (more real data stored).
+
+
+UPDATE (changing existing rows)
+
+    Usually changes data “in place” in the same blocks.
+    Storage may grow if rows get bigger or blocks need splitting/reorganizing.
+    Generates extra change data (undo/redo), which can also affect storage.
+
+DELETE (removing rows)
+
+    Usually just marks rows as deleted, leaving free space inside blocks.
+    Blocks are often not returned to the filesystem immediately.
+    So Delphix storage doesn’t shrink right away; it just has more free room inside existing blocks.
+    
+Impact on Delphix snapshots
+
+    Snapshots grow when blocks change.
+    Inserts/updates that change blocks can increase snapshot size.
+    Deletes don’t necessarily reduce snapshot size immediately; they just create reusable space in the database.
+
+insert vs update:
+    
+    INSERT = add new row
+
+        You are putting new data into the table.
+        The database may need new blocks if old ones are full.
+        Tends to grow the amount of data stored.
+
+    UPDATE = change existing row
+
+        You are modifying data that is already there.
+        Usually reuses the same blocks, changing values in place.
+        Storage may stay similar, or grow a bit if rows get bigger / blocks split.
+
+
+Why Log matters?
+    Transaction/redo logs are often required to keep snapshots provisionable and to support point-in-time operations
+
+        *Logsync Disabled
+        *Logsync Enabled
+
+Snapshot and Log Retention Policies:
+
+    A Retention Policy defines how long snapshots and log files are kept. Snapshot retention must be equal to or longer than log retention.
+
+Dataset Storage:
+    The main parts are:
+
+        Current Copy Size - Represents the storage for the current state of the database.
+
+        DB Log Size - Space used by logs (redo/transaction logs) that Delphix keeps.
+
+        Total Snapshot Size - Sum of storage for all snapshots of that dataset including shared snapshots space.
+        Temp File Size - Space used for temporary files associated with the dataset.
+        (And within snapshots: Shared Snapshot Space - Some blocks never change between snapshots.
+        Those blocks are shared by multiple snapshots instead of duplicated.
+        )
+
+Key Insights:
+
+    Current Copy Size typically increases when new records require new blocks to be allocated/used.
+
+    Total Snapshot Size may or may not increase. If inserts mostly consume new/unused blocks, older snapshots may remain near zero. If inserts also modify existing blocks (for example, index maintenance or block splits), snapshot space can grow.
+
+    The most recent snapshot appears at the top of the Timeflow and typically starts at ~zero unique size immediately after it is taken.
+
+Snapshot Storage in API and CLI Views:
+
+API View:
+    The typical capacity screens in the User Interface (UI) will show snapshot areas that include shared space. The API also provides infomation but what is missing in the API view is the shared storage.
+
+CLI View:
+    1. You can query snapshot space from the CLI
+    2. You choose which objects to reference
+    3. One object at a time → unique space
+    4. Multiple objects together → total + shared space
+
+So:
+
+    Single object in CLI → “How much unique snapshot storage does this object use?”
+    Multiple objects in CLI → “How much total snapshot storage do these objects use together, including shared blocks?”
+
+A note about current timeflow:
+
+    Current Timeflow is related to the timeflow for this object. Snapshots can have current and previous timeflows. A VDB can have multiple timeflows associated with it, in the case of refreshing for example.
+
+
+
+
+
