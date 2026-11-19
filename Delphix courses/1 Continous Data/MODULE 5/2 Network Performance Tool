@@ -1,0 +1,55 @@
+the network performance tool allows the administrator to test and measure the latency and throughput of the network between delphix cde and environments. 
+
+The Network Performance Tool is accessed by clicking the Resources Tab located on the Delphix Continuous Data Engine banner, and selecting Network Performance Tool.
+
+options in Network Performance Tool Testing tab: 
+
+    1. Latency 
+    2. Throughput
+    3. Delphix Session Protocol -- DSP
+
+
+Network Latency:
+    The Network Latency test measure the network roundup latency by transmitting the ICMP ECHO REQUEST and the time to recieve the replies from the remote host
+
+    ICMP ECHO REQUEST: 
+        An ICMP Echo Request (Type 8, Code 0) is a network-layer diagnostic message sent to test whether another device is reachable and online on an IP network
+    
+    can be accessed by - clicking on Latency in testing of NETWORK PERFORMANCE TOOL
+
+NETWORK THROUGHPUT:
+    This test supports two directions: Transmit and Receive. 
+
+    Transmit: the Delphix Engine sends traffic and the remote host receives.
+
+    Receive: the remote host sends traffic and the Delphix Engine receives.
+
+    accessed by - clicking THROUGHPUT in Testing
+
+Delphix Session Protocol(DSP):
+    DSP test measure the dsp performance :
+    * between 2 delphix CDE 
+    * between a Delphix CDE and a source/target envi
+
+Selecting an Environment
+
+    For either a Latency or Throughput test, you must select an environment. If you selected an environment in the Datasets panel, this field will auto-populate. 
+
+    For the DSP test, you have the option to test an engine or an environment, which gives you the option to test the default environment listed or select a different one.
+
+The History Tab:
+     this is next to testing tab
+    In the History tab, you can view the results of all previous tests you have run by selecting the radio button for the type of test for which you want to see the results. 
+
+    to see the details of any particular test, select the history tab and then click the test for which you want to see the results. 
+
+TESTING NETWORK LATENCY FROM CLI OR CONNECTING TO SSH:
+    we can perfromance Latency testing and Throughput testing from both CLI(command line interface) and connecting to SSH(Secure Shell)
+
+
+    
+
+
+
+
+

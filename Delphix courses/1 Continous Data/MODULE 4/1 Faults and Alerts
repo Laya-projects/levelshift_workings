@@ -1,0 +1,39 @@
+A Fault is an ongoing condition that persists until resolved. An Alert is a point in time event (may be caused by a fault or other job/system activity) such as a job failure or a completed operation
+
+Faults = Persistent
+
+Alerts = Transient
+
+Fault : represents on ongoing abnormal condition detected by the engine , such as exceeding the disk space threshold 
+
+two Fault severity levels:
+1. A Warning Fault
+2. A Critical Fault
+
+details about each fault can be obtained in a few ways:
+
+* The Dashboard
+* The Faults Page
+* Resolving and ignoring(On both the Dashboard and the Faults page, blue question mark with a link titled Resolving and Ignoring is present)
+
+The Fault page:
+    The Faults page has both a Current as well as an Archive tab, which shows the history of all faults. 
+
+        
+    You can view both Resolved and Ignored faults. These lists can be filtered by keyword or downloaded as a CSV file
+
+
+You can mark faults as ignored, however this should only be done if the fault meets the following criteria:
+
+    The fault is caused by a well-understood issue that cannot be changed
+
+    Its impact on the Delphix Engine is well understood and acceptable
+
+Aerts:
+    
+    An Alert represents a single event at a specific point in time, such as a job failure ("Permission denied while writing to file") or a job completion ("SnapSync job completed successfully".) Alerts reflect events, not persistent conditions.
+
+
+
+
+

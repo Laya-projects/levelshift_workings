@@ -1,0 +1,157 @@
+**dSource operations and management**:
+
+- **Link (create) dSource**  
+  - Connect Delphix to a **source database** (or staging DB) and run an initial ingest (backup/restore or RMAN/SnapSync) to create the dSource.
+
+- **Sync / SnapSync / LogSync**  
+  - **Regular syncs** update the dSource with new changes from the source:  
+    - SnapSync: captures new backups/changes into snapshots.  
+    - LogSync (if enabled): captures logs for **point‑in‑time** recovery.
+
+- **Provision from dSource**  
+  - Use the dSource as the **golden copy** to provision multiple **VDBs/vPDBs** at chosen snapshots or timestamps.
+
+- **Refresh and retention policies**  
+  - Apply **policies** that control:
+    - How often syncs/snapshots run.  
+    - How long snapshots and logs are retained (storage vs RPO trade‑off).
+
+- **Lifecycle operations**  
+  - **Pause/Resume** syncs (if supported) to control load.  
+  - **Disable/Enable** a dSource (stop using it temporarily without deleting).  
+  - **Delete** a dSource when no longer needed (after handling dependent VDBs).
+
+**Validated Sync and dSources**:
+
+    - **dSource**  
+    - A **Delphix-managed copy** of a source database (Oracle or SQL Server).  
+    - Created by linking to the source and doing an initial ingest (backup/restore, RMAN, staging push, etc.).  
+    - Used as the **golden copy** from which you provision VDBs/vPDBs.
+
+    - **Validated Sync**  
+    - A **sync operation that has passed all consistency checks** (e.g., backup completeness, archive/log chain, recovery tests).  
+    - Produces a snapshot that Delphix knows is **safe to provision from** (no missing logs, corrupt backups, or incomplete recovery).  
+    - Validated Syncs become the basis for **reliable VDB refreshes and point‑in‑time provisioning**.
+
+    In essence: dSources hold your ingested data; Validated Sync ensures each new snapshot of that data is consistent and ready for virtualization.
+
+**using pre- and post-scripts with SQL Server dSources**:
+
+    - **Purpose of scripts**
+    - Scripts let you run **custom actions automatically** around dSource sync operations.
+    - Common uses: prepare the environment, manage backups, clean up temporary data, or trigger notifications.
+
+    - **Pre-sync scripts (SQL Server dSources)**
+    - Run **before** Delphix ingests data for a sync.
+    - Typical tasks:
+        - Kick off or verify **SQL Server backups** (full/diff/log).  
+        - Ensure the database is in the correct state (e.g., verify recovery model, check space).  
+        - Mount required file shares or set environment variables.
+
+    - **Post-sync scripts**
+    - Run **after** Delphix finishes the sync and the new snapshot is created.
+    - Typical tasks:
+        - Clean up temporary files or backup artifacts.  
+        - Update monitoring/CMDB systems or send alerts.  
+        - Perform validation checks or logging about the completed sync.
+
+    - **Configuration**
+    - You attach pre-/post-scripts to the **dSource object** in the Delphix UI/CLI.  
+    - Scripts can be PowerShell, batch, or SQL scripts (depending on how you invoke them), and they run under the **configured Windows/SQL account**.
+
+**VDB operations and management**:
+
+    - **Provision**  
+    - Create a Virtual Database (VDB) from a **dSource or another VDB** on a target host at a chosen snapshot/point in time.
+
+    - **Refresh**  
+    - Update the VDB to a **newer snapshot/timestamp** from its parent, keeping test/dev close to production.
+
+    - **Rewind / Rollback**  
+    - Move the VDB back to an **earlier snapshot/point in time** to undo changes or return to a baseline.
+
+    - **Enable / Disable**  
+    - **Disable**: stop the VDB (unmount/shut down) but keep its definition and data inside Delphix.  
+    - **Enable**: bring it back online again.
+
+    - **Delete**  
+    - Permanently remove the VDB and its Delphix-managed storage.
+
+    - **Policies & hooks**  
+    - Attach **policies** (e.g., refresh schedules) and **pre/post scripts** to automate actions around these operations.
+
+**VDB maintenance**:
+
+    - **Refresh**  
+    - Bring the VDB up to a newer snapshot/point in time from its parent dSource/VDB.
+
+    - **Rewind / Rollback**  
+    - Move the VDB back to an earlier snapshot or point in time to undo changes.
+
+    - **Disable / Enable**  
+    - **Disable**: shut down the VDB and unmount storage while keeping its configuration and data in Delphix.  
+    - **Enable**: restart and remount it when needed.
+
+    - **Delete**  
+    - Permanently remove the VDB and its Delphix-managed storage.
+
+    - **Operational upkeep**  
+    - Monitor performance and space, update credentials, and manage pre/post‑scripts used during refresh, rewind, or provisioning.
+
+**SQL Server Policies and Hook Operations**:
+
+    Policies (for SQL Server dSources and VDBs)
+
+    Policies control how Delphix manages SQL Server objects over time:
+
+    - **Snapshot / Sync frequency**  
+    - How often Delphix ingests new backups/changes from the source.
+
+    - **Retention**  
+    - How long to keep **snapshots** and **transaction logs**, balancing RPO vs storage.
+
+    - **Refresh behavior** (for VDBs)  
+    - Whether/when VDBs should be **auto‑refreshed** from newer snapshots.
+
+    These policies are attached to **dSources and VDBs** to standardize behavior across environments.
+
+    ---
+    Hook operations (pre/post scripts)
+
+    Hooks let you run custom scripts around Delphix operations for SQL Server:
+
+    - **For dSources**  
+    - **Pre‑sync hook**: run before a sync (e.g., trigger backups, check DB state, mount shares).  
+    - **Post‑sync hook**: run after a sync (e.g., clean up files, log results, send notifications).
+
+    - **For VDBs**  
+    - **Pre‑provision / Post‑provision**: configure or clean up around VDB creation.  
+    - **Pre‑refresh / Post‑refresh**: actions before/after updating a VDB (e.g., disabling jobs, refreshing stats).  
+    - **Pre‑rollback / Post‑rollback** (where applicable): handle app changes when rewinding a VDB.
+
+    Hooks are typically PowerShell/Batch/SQL scripts executed under the configured Windows/SQL account, letting you automate environment-specific tasks around Delphix operations.
+
+**V2P for SQL Server** (Virtual‑to‑Physical):
+
+- **What V2P is**  
+  - V2P takes a **Delphix virtual database (VDB)** and exports it back to a **physical SQL Server database** on a chosen target host.  
+  - Essentially, you turn a virtual copy into a standalone, non‑Delphix‑managed database.
+
+- **Why you use it**  
+  - To **hand off** a finalized test/dev state to another team.  
+  - To create a **permanent copy** of a specific point‑in‑time VDB for performance, archiving, or compliance reasons.
+
+- **How it works (conceptually)**  
+  - In the Delphix UI/CLI, you select a VDB and choose **V2P/export**.  
+  - You specify:
+    - Target SQL Server host/instance.  
+    - File locations for data and log files.  
+    - DB name and any configuration options.
+  - Delphix **copies the VDB’s data** to the target and attaches it as a normal SQL Server database.
+
+- **Result**  
+  - The new database on the target is **no longer managed by Delphix**.  
+  - It behaves like any other physical SQL Server database, using local storage and standard SQL Server administration.
+
+
+

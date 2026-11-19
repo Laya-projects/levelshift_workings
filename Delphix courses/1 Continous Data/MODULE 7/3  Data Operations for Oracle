@@ -1,0 +1,99 @@
+Linking a dSource:
+    You register the source environment (host + Oracle homes) in the Delphix Engine.
+    In the UI, you choose Add dSource, select the source database and the ingestion type (Source-Based or Staging Push).
+    You provide required details (RMAN/backup settings, LogSync options, credentials, retention policies).
+    Delphix runs an initial load (typically an RMAN full backup or snapshot) to create the dSource copy in Delphix storage.
+    After that, SnapSync (and optionally LogSync) keep the dSource updated with incremental backups and archived redo logs.
+    So: linking a dSource “connects” Delphix to a specific Oracle database and sets up the ongoing backup/snapshot stream that powers VDBs.
+
+Managing Oracle RAC Node Changes in Delphix:
+
+VDB Operation and managements:
+
+    Provisioning an Oracle VDB :
+
+        In the Delphix UI, you choose Provision from a dSource or VDB and select a target environment (single instance or RAC).
+        You pick the point in time (snapshot or LogSync timestamp), set DB name, Oracle home, listener, and NFS mount directory.
+        Delphix creates the VDB by exposing data over NFS from the Engine to the target host, then starts the Oracle instance with appropriate init parameters.
+        The VDB is copy-on-write and space‑efficient: many VDBs can share the same base data from the dSource.
+        Once provisioned, the VDB behaves like a normal Oracle database on the target host but is managed by Delphix (refresh, rewind, disable, delete, etc.).
+
+    Provisioning a VDB from an Encrypted Oracle Database:
+
+        The source database uses TDE (Transparent Data Encryption) or similar; Delphix ingests its data into a dSource, preserving that encryption.
+        When you provision the VDB, you still specify the usual target details (Oracle home, listener, mount directory, etc.), but you must ensure the encryption wallet/keys are available and correctly configured on the target host.
+        Delphix presents the encrypted data over NFS; the Oracle instance on the target uses its wallet to decrypt data just as the source did.
+        The VDB thus remains encrypted at rest and behaves like any other Oracle encrypted database, but with Delphix features (refresh, rewind, etc.) on top.
+
+VDB Provisioning in the Delphix Engine UI:
+
+    VDB provisioning in the Delphix Engine UI is the guided process of creating a virtual database from a dSource or another VDB.
+
+        - You **select the source** object (a dSource or existing VDB) and choose **Provision**.  
+        - You **pick the point in time**: a snapshot or a specific LogSync timestamp.  
+        - You choose the **target environment** (single instance or RAC), Oracle home, and listener, and provide a **VDB name** and mount directory.  
+        - You configure **VDB settings** such as startup options, credentials, and any pre-/post‑provisioning scripts.  
+        - The Engine then:
+        - Creates NFS mounts to expose the data to the target host.  
+        - Starts the Oracle instance with the right init parameters.  
+        - Registers the new VDB so you can manage it (refresh, rewind, disable, delete) through the same UI.
+
+Adding or Removing RAC VDB Cluster Node After a VDB is Provisioned:
+
+    A RAC VDB is tied to a cluster environment in Delphix; each node must have the toolkit, delphix_os user, and shared storage correctly configured.
+
+    If you add a node to the RAC cluster, you must:
+
+    Ensure the new node meets all Delphix requirements (user, toolkit, shared storage).
+    Update the environment definition in Delphix so the node is recognized.
+    Adjust Oracle RAC configuration (srvctl, etc.) so the VDB instance can run on that node.
+
+    If you remove a node:
+
+    Stop/relocate any VDB instances running there.
+    Update RAC configuration and Delphix’s environment definition to reflect the new cluster membership.
+
+    After changes, you typically:
+
+    Rerun HostChecker on affected nodes.
+    Refresh the environment in the Delphix UI and verify that VDB services and cluster status are correct.
+
+VDB Maintenance:
+
+    Refresh
+        Re-syncs the VDB with a newer snapshot or point in time from the dSource (or parent VDB).
+        Used to bring test/dev environments up to date with production.
+
+    Rewind / Rollback
+        Moves the VDB back to an earlier snapshot or point in time.
+        Useful for undoing unwanted changes or returning to a known baseline.
+
+    Disable / Enable
+        Disable: unmounts NFS storage and shuts down the VDB instance while preserving its definition and data in Delphix.
+        Enable: remounts storage and restarts the instance when you need it again.
+        Delete
+
+    Permanently removes the VDB, including Delphix-managed storage and metadata, to free capacity.
+    Operational tasks
+
+    Monitoring performance and space usage, managing credentials, and updating pre/post‑scripts that run during refresh, rewind, or provisioning.
+
+
+Oracle Policies and Hook Operations:
+
+    Policies
+
+        Define how Delphix manages your Oracle dSources and VDBs over time.
+        Typical policy settings include:
+        Snapshot frequency (how often SnapSync runs).
+        Retention (how long snapshots and archived logs are kept).
+        LogSync options (whether redo logs are collected for point‑in‑time recovery).
+        Policies help balance RPO/RTO, storage usage, and performance.
+        Hook operations
+
+Hooks are scripts that Delphix runs automatically at specific points in an operation.
+Common hook types:
+    Pre‑sync / Post‑sync – around dSource sync to, for example, prepare or clean up a staging database.
+    Pre‑provision / Post‑provision – around VDB creation to apply configuration steps (e.g., users, parameters, masking).
+    Pre‑refresh / Post‑refresh – to adjust the environment before/after a VDB is refreshed.
+    They let you embed custom operational logic into Delphix workflows (automation, masking, environment prep/cleanup).

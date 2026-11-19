@@ -1,0 +1,130 @@
+Objects that Consume Disk Space
+
+Objects that consume disk space include datasets, timeflows, and snapshots. 
+
+        Delphix storage is primarily consumed by datasets (including dSources and VDBs) and their associated timeflows and snapshots.
+
+
+        A timeflow represents the timeline/history of a dataset, and snapshots represent the state of that dataset at specific points in time.
+
+
+you can access capacity information for the Delphix Engine through several different means, including the Dashboard view, and the Storage Capacity screen.
+
+Reversed Space of  15% of the total disk space allocated to the Engine.
+
+In order to obtain the best performance and continued operations, the Delphix Engine requires a free space reservoir. 
+
+         85% of the total storage quota is reached or 1536GB of free space is remaining (whichever is less), a Warning fault is triggered.
+
+          90% of the total storage quota is reached or 1024GB of free space is remaining (whichever is less), a Critical fault is triggered. You cannot ignore or resolve this fault.
+
+          95% of the total storage quota is reached or 512GB of free space is remaining (whichever is less), a second Critical fault is triggered. This fault will have a significant impact on the system's behavior and certain dSources and VDBs will stop in order to maintain data integrity. 
+
+   Tabs in Storage Capacity dashboard:
+
+        1. Datasets - detailed info of all the dataset available
+
+        2. Snapshot - Rows are always sorted by descending size with a link to the dataset page for the Snapshot’s parent dataset. Snapshots created from Replicas are excluded.
+
+        3. Held Space- Provides a list of Held Space on the engine. You can search the held spaces by their names.
+
+        4.Recieved Replicas - Provides a list of Namespacesi sorted by descending size by default.
+
+        5. How it Works - Provides general information about Storage, Retention Policy and Manual deletion.
+
+what is namespaces ?
+
+    In the Delphix Continuous Data Engine, namespaces are isolated, logical containers used to organize and separate replicated data objects on a target engine.
+
+Understanding Delphix Disk Usage:
+
+    size of a snapshot is defined to be the size of changes that are unique to that snapshot.
+
+    A block can be shared by multiple Snapshots if the block has not changed between the creation of those Snapshots. Any blocks that are shared amongst multiple Snapshots are accounted for in the shared Snapshot Space total.
+
+a report at the corner of the page with some fields those def are followed:
+
+    Current copy size: amount of space used on the Delphix Engine by the VDBs data but across all the Time flows.
+
+    DB Log Size: the size for archive log files.
+
+    Temp File Size : This field is currently not active (for future use).(so. 0.00)
+
+    Container Size: the size of the whole dataset.
+
+    Total snapshot size: total snapshot size is the size of all snapshots combined, including anything shared.
+
+    Shared Snapshot space: is the space shared by snapshots.
+
+Reviewing Historical Capacity From CLI:
+
+Process:
+
+        1. Log in to the Continuous Data Engine via CLI as admin (or another admin-level account).
+        2. Go to the historical capacity area by typing:
+        cd capacity system historical
+        3. To see all historical capacity data, type:
+        list
+        4. To see a specific time range, type list with dates, for example:
+        list startDate=2024-01-01 endDate=2024-01-31
+        5. To change how “zoomed in” the data is, use resolution (in seconds), for example:
+        Daily data: resolution=86400
+        Weekly data: resolution=604800
+
+Quotas: 
+    Quotas can be used to set limits on the amount of space available to each group, dSource or VDB. By doing so, you can prevent the uncontrolled consumption of storage space.
+
+setting Quotas:
+
+    1. Log in to the Delphix Management application.  
+    2. Go to `Manage` → `Datasets`.  
+    3. Click the dataset (group, dSource, or VDB) you want to limit.  
+    4. Open the `Configuration` tab.  
+    5. Then open the `Policies` tab.  
+    6. On the Quota tile, choose `Customize this policy`.  
+    7. In “Quota Policy”, type the maximum size (in MB) you want to allow, and save.
+
+Key idea: a quota is just a storage limit per object—set carefully, because hitting the quota can cause snapshots and logs to fail.
+
+Threshold for Quotas:
+- **Below 80% of quota**  
+  Normal operation. If anything was disabled earlier due to hitting a critical quota, it can be automatically re‑enabled.
+
+- **80% to <90%**  
+  Warning fault raised, but databases can keep running. Objects disabled earlier by critical quota can be re‑enabled.
+
+- **90% to <95%**  
+  Warning fault stays. Databases that were disabled when you hit a critical threshold are **not** auto‑re‑enabled; you must enable them manually.
+
+- **95% or more** (Critical)  
+  Very serious:  
+  - dSources and VDBs under that quota are disabled.  
+  - Many DB jobs are blocked or cancelled.  
+  - System keeps checking frequently until usage drops.
+
+Think of it as:  
+80% = “start paying attention”,  
+90% = “act now”,  
+95% = “engine is protecting itself; things will stop.”
+
+Disallowed Database Actions when in Quota Critical Threshold:
+    1. Target is Group : 
+        refreshing target in group; Sync target in the group ; Link into the group; Provisioning into the group; Enable target in the group (dont you dare do anything in the target)
+
+    2. Target is not a group:
+        Refresh target ;Sync target ;Enable target.
+
+Managed Sources:
+    The Managed Source Data dashboard tile provides an aggregate sum of the size of ingested source databases. This helps to understand the total amount of data per-engine that is managed by Delphix.
+
+Managed Source Data View:
+    Selecting the View link located on the top-right of the Managed Source Data section of the Dashboard, takes users to the Managed Source Data page
+
+    This page provides a detailed breakdown of the total usage
+
+    
+
+
+
+
+

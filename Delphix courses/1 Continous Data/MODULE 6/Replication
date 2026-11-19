@@ -1,0 +1,126 @@
+Def:
+    Delphix Replication asynchronously copies selected Delphix objects to a remote Delphix Engine at another site (on-premises or in the cloud).
+
+namespace:
+    In the Delphix Continuous Data Engine, a namespace is an isolated logical container on a receiving engine that separates replicated data objects from local objects.
+
+
+The source engine then sends incremental updates manually or according to a schedule. Engine admins can run Replication ad hoc, but Replication is typically run according to a predefined schedule after the initial update.
+
+With Delphix Replication, we can copy some or all of the data objects stored in one Delphix Engine to one or multiple other Delphix Engines. Note that multiple targets typically means multiple replication profiles.
+
+The following objects are NOT copied as part of a backup or replication operation:
+
+    1. Events and faults
+    2. Job history
+    3. System service settings, such as SMTP
+    4. Hook Templates
+    5. Alert profiles
+
+On-Premises and Hybrid Replication:
+    1. Think of each Delphix Engine as a “data hub.” One can live in your data center (on‑premises) and another in the public cloud (AWS, Azure, etc.).
+
+    2. Replication means the on‑premises engine regularly copies selected data (dSources, VDBs, masked datasets) to the cloud engine.
+    
+    3. This hybrid setup lets you:
+        Keep production data controlled and secure on‑premises.
+        Give developers and testers in the cloud fast, safe access to that data (often via masked copies).
+    4. You can then provision and refresh VDBs in the cloud from those replicated objects, without pulling directly from production each time.
+
+In short: on‑prem for control and security, cloud for speed and scale; replication is the bridge that keeps them in sync.
+
+Replication to the public cloud:
+    you may have a Delphix engine in the production zone to ingest data securely, with replication set up to the public cloud for development access and rapid, on-demand testing.
+
+    Configuring replication is as simple as having a second Delphix Continuous Data Engine that is reachable over the network.
+
+    requirements:
+            Source and target engines must be the same Delphix version with the exception of Forward Compatible Replication, FCR, scenarios. 
+
+            Port 8415 must be open for the source to send to the target.
+
+            The replication profile user must have admin privileges on both engines.
+
+            There must be sufficient free storage on the target.
+
+Forward Compatible Replication(FCR):
+    FCR lets a Delphix source engine replicate to a target engine that’s on a higher version of Delphix, as long as certain rules are met.
+
+    Key idea:
+        Source version ≤ Target version, within allowed version gaps.
+
+    * You can provision VDBs from the replicated objects, allowing for the geographical distribution of the data and remote provisioning
+
+    * Replication typically runs according to a pre defined schedule
+
+    * After the first update, the next updates send only the changes incurred sice the previous update
+
+    * Replication is not suited for high availability configurations where rapid failover is a requirement
+
+    * Leverage features of the underlying hypervisor or storage platform where high availability is necessary
+
+Usecases:
+    1. Disaster recovery
+    2. Geographical distributed development
+    3. MIgration
+    4. Replication to the Public Cloud
+
+
+Disaster Recovery - Replication Failover and Conflict Resolution:
+
+    All databases and objects within a replica automatically start in the disabled state after a failover. This allows the administrator to alter configuration prior to enabling datasets and environments, without the system inadvertently connecting to invalid systems.
+
+    After a failover, all of the objects will appear in the system, as if they had been created locally.
+
+    Maintain a one-to-one relationship between source and targets.
+
+
+Automated Replication Failover: Certain objects may require changes to resolve conflicts prior to completing a replication failover.
+
+Object naming conflict: Names of replicated objects should be unique for failover to complete successfully.
+
+Geographically Distributed Development:
+
+    You have one central Delphix Engine that links to your real source databases.
+        
+    Delphix then replicates dSources and VDBs from that central engine to other Delphix engines in different locations (or cloud regions).
+
+    Developers in those remote locations provision VDBs locally from the replicated data, instead of pulling directly from the original source database.
+
+    This means:
+    Less load and fewer syncs on the production/source database.
+    Faster, local access to data for teams in different regions.
+
+    Replication usually stays continuous (no failover), and remote VDBs can be refreshed as long as the parent objects still exist on the source engine.
+
+
+Selective Data Distribution (SDD)
+
+    Selective Data Distribution (SDD) distributes masked data between Delphix Engines using the replication infrastructure. SDD sends masked VDBs to a target engine without bringing over the unmasked parent source, so the unmasked parent is not accessible on the target
+
+For Geographical Distribution, follow these best practices:
+
+    Minimize the number of simultaneous replication updates.
+
+    If possible, avoid heavy VDB workloads on the source.
+
+    If a source is deleted, remote VDBs can no longer be refreshed.
+
+    Remotely provisioned VDBs can consume shared storage on the target even when the parent is deleted on the source.
+
+Data Migration :
+
+    Beyond replicating to the public cloud, replication can also be used for data migration. You can use replication to perform a one-time migration of resources, such as virtual databases or environments from one Delphix engine to another.
+
+
+
+
+
+
+
+
+
+
+
+
+

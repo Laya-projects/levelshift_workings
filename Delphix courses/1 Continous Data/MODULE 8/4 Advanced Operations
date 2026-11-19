@@ -1,0 +1,104 @@
+**measuring network performance via the Delphix CLI**:
+
+    - **Purpose**  
+    - To test **bandwidth and latency** between the Delphix Engine and source/target hosts, and identify network bottlenecks that could affect syncs and VDB performance.
+
+    - **How it’s done (conceptually)**  
+    - From the **Delphix CLI**, you run a **network performance test command** that:
+        - Opens test connections between the Engine and a chosen host.  
+        - Sends and receives data over a dedicated **performance test port** (the lesson mentions TCP **50001** for tests).  
+
+    - **What you get**  
+    - Metrics such as:
+        - **Throughput (MB/s)**.  
+        - **Latency** and possibly packet loss.  
+    - These help you decide if:
+        - The network is fast enough for large syncs and VDB workloads.  
+        - You need changes to routing, bandwidth, or firewall/IDS configuration.
+
+    In short: you use the CLI to run built‑in Delphix network tests over port 50001 between the Engine and database hosts, then interpret the results to validate or improve performance.
+
+
+**V2P (Virtual to Physical) via the Delphix CLI**:
+
+    - **What you do in the CLI**
+    - Navigate to the **database/VDB object** in the CLI tree.
+    - Invoke the **V2P/export operation** on that VDB.
+    - Provide required parameters, such as:
+        - **Target host and SQL instance**.
+        - **Database name** on the target.
+        - **File paths** for data and log files.
+        - Any relevant credentials/options.
+
+    - **What Delphix does**
+    - Copies the VDB’s data out of Delphix storage to the specified target host.
+    - Attaches/creates the database on the target SQL Server (or Oracle) instance as a **normal physical database**.
+
+    - **Result**
+    - The new database on the target is **no longer managed by Delphix**—it’s now a standard physical DB that you administer with native tools.
+    - The original VDB inside Delphix remains unchanged unless you explicitly delete it.
+
+
+**recovering a deleted table using LogSync**:
+
+    - **What LogSync gives you**
+    - LogSync continuously collects **redo/transaction logs** from the source database (Oracle or SQL Server).  
+    - This allows Delphix to create **point‑in‑time (PIT) snapshots**—you can provision a VDB at an exact time, not just at backup boundaries.
+
+    - **Recovery concept**
+    - When a table is accidentally deleted, you:
+        1. Identify the **approximate time** just before the delete occurred.  
+        2. Use Delphix to **provision or rewind a VDB** to that **pre‑delete timestamp** using LogSync data.  
+        3. Connect to that VDB and:
+        - Export the table’s data (e.g., `INSERT INTO ... SELECT` or data pump/BCP).  
+        - Copy or merge it back into the current production or another environment.
+
+    - **Why this works**
+    - Because LogSync captured all relevant **redo/log entries**, Delphix can reconstruct a consistent database state **from before the delete**, even if there wasn’t a full backup at that exact moment.
+
+    In short: LogSync lets you time‑travel a VDB to just before the table was deleted, so you can pull the table’s data out and restore it.
+
+**configuring Delphix Continuous Data Engine replication**:
+
+    - **Purpose**  
+    - Set up one Engine as a **replication source** and another as a **replication target**, so dSources, VDBs, and related objects are copied between them (often for DR or regional copies).
+
+    - **Key steps**
+
+    1. **Prepare both Engines**  
+        - Ensure **network connectivity** between source and target Engines.  
+        - Firewalls must allow required ports (especially **TCP 8415** for DSP and **443** if HTTPS management is used).
+
+    2. **Configure the target Engine**  
+        - In the target UI, define it as a **replication target** (configure storage, retention, and any security settings).
+
+    3. **Configure the source Engine**  
+        - On the source, create a **Replication Profile**:  
+        - Specify **target Engine hostname/IP and credentials**.  
+        - Choose what to replicate (specific **dSources**, **VDBs**, groups, or whole datasets).  
+        - Set **schedule and retention** (how often replication runs, how many versions to keep).
+
+    4. **Run and monitor replication**  
+        - Start replication manually or let the **schedule** run.  
+        - Monitor job status and space on the target.  
+        - On the target, replicated objects can be **activated or used** (e.g., to provision VDBs for DR).
+
+**Failover Clusters vs Availability Groups** (and the shift from one to the other):
+
+    - **Failover Cluster Instances (FCI)**  
+    - SQL Server runs as a **single instance** on a Windows Failover Cluster.  
+    - Shared storage (clustered disks) holds the database files.  
+    - If the active node fails, the instance **fails over** to another node using the same shared storage.  
+    - Provides **instance-level** high availability.
+
+    - **Always On Availability Groups (AG)**  
+    - Introduced to provide **database-level** high availability and read scaling.  
+    - Multiple replicas each have **their own copy** of the database (no shared storage).  
+    - One replica is **primary**, others are **secondary**; you can use secondaries for **read-only workloads** and backups.  
+    - Failover happens at the **Availability Group (database) level**, not the entire instance.
+
+    - **From FCI to AG (conceptual shift)**  
+    - Move from **instance + shared disk HA** (FCI) to **database + replicated data HA** (AG).  
+    - AGs give more flexibility (readable secondaries, per-database failover, better DR options), while FCIs keep a simpler, single-instance shared storage model.
+
+ 

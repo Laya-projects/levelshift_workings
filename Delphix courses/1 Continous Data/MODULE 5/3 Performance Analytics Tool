@@ -1,0 +1,92 @@
+Performance Analytics Tool gives insights on delphix CDE performance.
+
+It can be accessed through the Delphix Engine UI, as well as the CLI and through the web services API. 
+
+accessed by clicking the Resources tab located on the Delphix Continuous Data Engine banner, and selecting Performance Analytics.
+
+The PAT provides capabilities that can help us narrow down the cause of observed performance 
+those tools operate in 2 central concepts:
+    *statistic
+    *statistic slices
+
+The Delphix Engine ships with a default set of collected statistics:
+
+    *CPU Utilization : Total CPU utilization for all CPUs. This statistic includes both kernel and user time.
+
+    *Network Throughput: Measures throughput in bytes and packets, broken down by sent vs. received data and by the network interface. Each network interface shows four graphed lines: bytes sent, bytes received, packets sent, and packets received.
+
+    *Disk I/O : Measures a number of I/O operations, and the latencies and throughput of the underlying storage layer. The statistic is represented by the graphs - a column chart for I/O operations, a heat map for latency distribution, and a line chart for throughput.
+
+    *NFS(Network File System) : Measures I/O operations and the latency /throughput of the NFS server layer on the delphix engine. This statistic is useful for diagnosing  performance of dSources and VDBs using NFS mounts (for example, Oracle and PostgreSQL).
+
+    *iSCSI(Internet small computer system interface):
+    it measure I/O operation andthe latency andthe throughput ofthe iSCSI server layer in the delphix engine
+
+
+The actual data a statistic can collect is described through a set of axes, each of which describes one "dimension" of that statistic. For example, the statistic associated with Network File System (NFS) operations has a latency axis, as well as an operation type axis (among many others), which allows users to see NFS latencies split by whether they were reads or writes.
+
+each axis has some important info embedded in it:
+    * The Name
+    * The Value Type(A value type, which tells you what kind of data will be collected for this axis. )
+    * The Constraint Type(A constraint type is only relevant while creating a statistic slice.)
+
+However, if you had collected the operation type axis as well as the latency axis, you would get two streams of datapoints: one for read operations, and one for write operations.
+
+• Latency Axis (The Measurement): This simply measures how long an operation took in time (microseconds or milliseconds), regardless of what kind of action it was.
+• Operation Type Axis (The Filter): This labels what the operation actually was (Read vs. Write).
+
+so , what is operation type axis and latency type axis in statistics of performance analytics tool??
+
+    Operation type and latency axes work together to help administrators pinpoint exact performance bottlenecks across storage, network, and database I/O
+
+And these lead to 2 data stream , one for read operations and one fro write , how and why??
+
+    When you slice latency by the operation type axis in the Delphix Performance Analytics Tool, the chart splits into two primary data streams: Read operations and Write operations.
+
+    • The read data stream: tracks requests where a target host (a Virtual Database) is reading existing data blocks from the Delphix Engine over NFS or iSCSI.
+
+    • The write data stream: racks requests where a target host is writing new or modified data blocks back to the Delphix Engine
+
+Statistic "Slices":
+
+    "Slices" are so named because each one provides a subset of the information available from the parent statistic it is associated with.
+    
+Statistics defines what data could be collected and are auto populated by the system
+
+But, Statistic slices are what actually collect the data, and users create slices when specific performance data needs to be gathered.
+
+ Each slice is an instantiation of exactly one statistic, and can only gather data that is described by that statistic.
+
+checklist for instantiation of slices under a specific statistic description:
+    # The statistic type this slice is associated with. This must be the same type as the statistic of which this is an instantiation.
+    # The collection interval, which must be greater than the minimum collection interval the parent statistic gives.
+    # The axes of the parent statistic this slice will collect.
+
+WORKING WITH PERFORMANCE ANALYTICS GRAPHS:
+    for each set of collected statistics there exists a specific graph like for CPU, Network throughput, disk i/o , NFS and iSCSI
+
+    Tabs ib Graph: Timescale, chart tab, timeline sector
+    for network chart - network interface, graph legend, pause/play button
+
+        Left/Right Button: The Left and Right Buttons allow you to Scroll the Available Data Timeline by a specified time range depending on the current Zoom Level. 
+
+        Graph Value Tooltip: The graphs can show you the value, along with the time stamp, for a specific data point across the timeline
+
+        Latency Range Selector : The Latency Range Selector controls the lower and upper limits for displayed latency buckets. You can drag the lower and upper controls to drill down into a specific range of latency buckets. 
+
+        Latency Outlier Selector:The Latency outliers feature filters out infrequent latencies (outliers) based on a percentage threshold. Its range is 0%-10%, with a default of 0% and can be adjusted by sliding the bar along the percentage line.
+
+what is Latency? Latency is simply delay—the exact amount of time it takes for a request to travel from Point A to Point B and get a response back.
+
+To create Statistic "Slices", there are a number of graph controls available:
+    Op. Type:
+        Operation Type is a menu option used in Disk I/O, NFS and iSCSI charts.
+
+
+Statistic Type Information can also be accessed via the CLI and API Calls
+
+    
+
+
+
+
