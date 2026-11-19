@@ -1,0 +1,163 @@
+Engine prerequisites for Oracle
+    On Oracle database servers (source, staging, target), Delphix needs four key things.
+
+    OS account
+            An OS account (often delphix_os) that:
+            Belongs to the same primary OS group as the Oracle software owner.
+            Has SSH access from the Delphix Continuous Data Engine.
+            This account is used by Delphix for:
+            Executing local commands (sqlplus, RMAN).
+            Running toolkit operations.
+            Managing mounts and VDB operations (on targets).
+    Toolkit space
+            About 1.5 GB of disk space is needed for the Delphix Java-based toolkit.
+            The toolkit:
+            Is deployed on each managed environment.
+            Is used by SSH sessions initiated from the Engine to run Delphix operations.
+            Additional free space is recommended for upgrades and maintenance (covered earlier in the lesson for hosts).
+    Database account
+            A DB account with read-only access to Oracle data dictionary views.
+            This account enables JDBC access from the Delphix Engine to:
+            Discover objects.
+            Read metadata (schemas, tablespaces, etc.).
+            Support ingestion operations and monitoring.
+    Sudo privileges on targets
+            For target environments (where VDBs run), Delphix needs escalated privileges (sudo) for certain OS commands:
+
+            mount, umount – to mount/unmount Delphix NFS storage for VDBs.
+            mkdir, rmdir – to manage directories for VDB mount points.
+            ps – to inspect processes when managing databases.
+            These privileges are essential for provisioning and managing VDBs.
+
+    2.5 Validation with HostChecker
+            All prerequisites must be validated using the Delphix HostChecker script on both source and target environments.
+            HostChecker confirms:
+            OS user and groups are correct.
+            Required files, libraries, and permissions exist.
+            Connectivity and toolkit paths are valid.
+
+Connecting to the Delphix Continuous Data Engine
+        There are multiple ways for administrators to connect to the Engine:
+
+        Web UI (Management Application) via HTTP/HTTPS.
+        Initial setup menu via the login screen:
+        Click “setup” under the password box to access initial configuration.
+        The main configuration is performed using the Server Setup application.
+
+erver Setup application (Engine configuration): 
+    The Server Setup application is accessed using the Engine’s IP address or hostname (defined during network configuration), via a specific setup URL (shown in the lesson).
+
+    Within Server Setup, you perform the initial Engine configuration:
+
+    Select Engine type :
+        Choose the type of Engine to configure:
+        Continuous Data (for database virtualization and data operations).
+        Continuous Compliance (for masking/compliance scenarios).
+        For this course, the focus is on Continuous Data.
+
+        Set up administrators:
+        You define two key admin roles:
+
+        System Administrator (SYSADMIN)
+        Engine Administrator (ADMIN)
+        For each:
+
+        Provide username and password.
+    Provide email addresses used for:
+        System alerts.
+        Engine alerts.
+        Critical notifications (e.g., faults, warnings).
+        Important points:
+
+        Use a strong password.
+        Keep track of these credentials: if lost, you must contact Delphix Support to reset them.
+        
+    Run through the Setup Wizard:
+        The Setup Wizard guides you through several configuration steps:
+
+        Add NTP Server
+
+        Configure Network Time Protocol so the Engine’s clock is accurate and aligned with other systems.
+        Add Network
+
+        Set up network interfaces, IP addressing (static or DHCP), and basic connectivity settings.
+        Add Network Security
+
+        Configure firewall/ACL rules, security options, and encryption settings as applicable for your deployment.
+        Add Storage
+
+        Define storage devices or volumes the Engine will use for:
+        dSources (ingested data).
+        VDBs (virtual database storage).
+        Typically, this is SAN storage configured as Delphix storage.
+        Configure Outbound Connectivity
+
+        Set up connectivity for:
+        DNS, NTP, SMTP, LDAP/SAML/SSO, Support upload.
+        Ensure the Engine can reach external services needed for:
+        Authentication.
+        Email alerts.
+        Support bundle uploads.
+        Configure LDAP and SAML/SSO
+
+        Integrate with directory services and single sign-on if the organization uses them.
+        This allows users to log in using corporate identities.
+        Configure Network Authentication
+
+        Set up how users and systems authenticate to and through the Engine:
+        Possibly Kerberos, LDAP, or other mechanisms, depending on environment.
+        Register Engine
+
+        Finalize registration so the Engine is recognized and ready for use in your environment.
+
+HostChecker and BEQ in context of setup
+    After the Engine is configured, two things are emphasized:
+
+    HostChecker (environment validation)
+        Before adding any environment (source or target) to the Engine:
+        Run HostChecker on that host.
+        HostChecker:
+            Checks OS user configuration.
+            Verifies toolkit directories and permissions.
+            Confirms required libraries (.so files) are present and accessible.
+            Produces warnings if something is missing or misconfigured.
+            This reduces setup errors when you later link sources or provision VDBs.
+
+        Bequeath (BEQ) protocol:
+            Bequeath (BEQ) is now the default and preferred way for Delphix to connect to Oracle.
+            BEQ characteristics:
+            No network listener required for those local connections.
+            Oracle internally spawns a dedicated server process per client.
+            Used for local connections where client and database instance are on the same host.
+        In the context of setup:
+
+            sqlnet.ora must allow BEQ connections (as covered earlier in the requirements).
+            If OCI binaries are present, HostChecker can test BEQ connectivity.
+            HostChecker will only post BEQ warnings/failures if:
+            Valid database credentials are supplied.
+            TCP connection works (for its test cases).
+Putting it together: practical flow
+    In practice, Engine Prerequisites and Setup look like this:
+
+    On each Oracle host (source and target):
+    Create and configure delphix_os (or equivalent) OS user.
+        Ensure toolkit directory and space are available.
+        Provide a DB account with read-only data dictionary access.
+        Configure sudo for required OS commands (especially on targets).
+        Deploy and start the Delphix Engine (via OVA/AMI, covered in another section).
+
+    Access the Server Setup application:
+
+        Choose Engine type (Continuous Data).
+        Create SYSADMIN and ADMIN accounts with emails and strong passwords.
+        Walk through the Setup Wizard:
+        NTP, network, security, storage, outbound connectivity, LDAP/SAML, authentication, registration.
+        Run HostChecker on each environment:
+
+        Fix any warnings/failures (permissions, libraries, BEQ settings, etc.).
+
+    Once prerequisites pass HostChecker:
+
+        Add source, staging, and target environments in the Engine UI.
+        Proceed to link Oracle databases, create dSources, and provision VDBs.
+

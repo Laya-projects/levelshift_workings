@@ -1,0 +1,212 @@
+Delphix OVA:
+        In order for Delphix Engines to ingest data or provision virtual databases, your Oracle environments must comply with Delphix environment configuration standards. You must use the Delphix supplied OVA (Open Virtualization Archive) to install the Delphix Continuous Data Engine on VMware. The OVA file is configured with many of the minimum system requirements and deploys to one 300 GB hard disk with 8 vCPUs and 64GB RAM (minimum) or 128GB RAM (recommended). 
+
+Delphix OVA – key installation points
+
+Use the Delphix‑supplied OVA
+
+        You must use the official Delphix OVA (Open Virtualization Archive) to install the Delphix Continuous Data Engine on VMware.
+        Preconfigured VM sizing
+
+        The OVA deploys a VM with:
+        One 300 GB hard disk
+        8 vCPUs
+        64 GB RAM minimum (128 GB RAM recommended)
+        Underlying storage is assumed to be redundant SAN storage.
+        Download requirements
+
+        The OVA file is downloaded from Delphix resources.
+        You need a support login from your sales team or a welcome letter to complete the OVA download.
+        Capacity planning for data disks
+
+        Size Delphix storage roughly to match each source database.
+        Example: for a 4 TB source database, plan for 4 TB of storage per Delphix Engine.
+        Add at least four similarly sized data disks on the Delphix VM (e.g. for 4 TB: 4 VMDKs of 1 TB each).
+
+Architecture for oracle:
+    Environment, Source, Target, dSource, VDB
+
+two ways by which Delphix Continuous Data Engines can ingest data from an Oracle source:
+
+        Source-based ingestion: It is just Delphix pulling data directly from the production (source) database server.
+
+                You register the source Oracle environment with the Delphix Engine.
+                
+                Delphix connects to that server and does an RMAN backup to copy the database into Delphix storage — this becomes the dSource.
+                
+                After the first full copy, Delphix runs incremental backups (SnapSync) to keep the dSource up to date.
+                
+                If LogSync is enabled, Delphix also collects archived redo logs, so you can later create virtual databases at specific points in time.
+                
+                So: Delphix talks straight to the source DB, backs it up into Delphix, then keeps it in sync with smaller, ongoing backups and logs.
+
+        Staging push ingestion: is Delphix using an extra “middle” database (staging) instead of talking directly to production.
+
+                In simple words:
+
+                - You create a **staging database** (same Oracle version as production) on a staging server.  
+                - That staging database is filled using your **existing backups or replication** from production.  
+                - The **staging DB’s files live on NFS storage** provided by the Delphix Engine.  
+                - Delphix takes **snapshots of the staging database**, and those snapshots become the **dSource**.  
+                - The staging DB only needs to be **up while snapshots are taken**; it can be shut down afterwards to save resources.
+
+                So: instead of Delphix backing up production directly, you keep a staging copy up to date, and Delphix ingests from that staging database.]
+
+Oracle support matrix:
+
+        The Oracle support matrix is Delphix’s compatibility list for Oracle.
+
+- It states which **Oracle database versions and editions** (Enterprise, Standard) Delphix supports.  
+- It covers both **single-instance Oracle DB** and **Oracle RAC**.  
+- It maps supported Oracle versions to **OS platforms** like RHEL, SLES, Solaris (SPARC/x86), HP-UX, and AIX.  
+
+In practice: you check the matrix to confirm that your Oracle version and operating system combination is officially supported by Delphix before onboarding hosts.
+
+Requirements for Oracle host and Databases
+
+Each host running Oracle must have a designated operating system user in place. You can create this user easily by running the createDelphixOSUser.sh(opens in a new tab) script.
+
+
+these requirements apply for both source and target envi
+
+        OS user (delphix_os)
+
+                Must exist on each Oracle host, with similar environment and privileges to the Oracle user, and in Oracle-related groups (OSDBA/OSBACKUPDBA, typically dba/backupdba).
+
+        Oracle software & DB
+
+                Read access to $ORACLE_HOME and tools (sqlplus, RMAN).
+                sqlnet.ora must allow bequeath (BEQ) connections.
+                Databases should be in ARCHIVELOG mode; BCT and FORCE LOGGING are strongly recommended.
+        
+        Toolkit & filesystem
+
+                Dedicated toolkit directory (e.g. /var/opt/delphix/toolkit) owned by delphix_os, with required permissions and ~1.6 GB space (plus 500 MB free for upgrades).
+                Bash shell available in the path.
+        
+        Connectivity & security
+
+                SSH access from Delphix Engine to hosts (port 22), with optional TCP forwarding for LogSync.
+                Extra consistency requirements and permissions for RAC nodes, including shared storage and tools like srvctl, crsctl, olsnodes.
+        
+        Target host extras
+
+                delphix_os in OSDBA, NFS mount directory for VDBs, sudo for mount/umount/mkdir/rmdir/ps, Oracle listener running, and NFS-related packages/services enabled.
+
+Auto Discovery Requirements:
+
+        focus on what Delphix needs to automatically find Oracle homes and databases:
+
+        ORATAB file
+
+        Must exist (typically /etc/oratab or /var/opt/oracle/oratab).
+        Must be readable by delphix_os.
+
+        Oracle inventory location
+
+        Read access to /etc/orainst.loc or /var/opt/oracle/orainst.loc.
+        Read access to the Oracle inventory file (inventory.xml, e.g. $INVENTORY_HOME/ContentsXML/inventory.xml).
+
+        Process tools permissions
+
+        Permission to run pargs on Solaris.
+        Permission to run ps on AIX, HP‑UX, and Linux as super‑user (usually via sudo).
+
+The idea: Delphix reads ORATAB and inventory files and inspects running processes to automatically discover Oracle installations and databases.
+
+Source database requirements (Oracle):
+        Oracle Home permissions
+
+        delphix_os must have execute permission on $ORACLE_HOME/bin (sqlplus, RMAN, etc.).
+        Oracle binary flags
+
+        $ORACLE_HOME/bin/oracle must have SETUID and SETGID set (permissions at least -rwsr-s–x / 06751).
+        ARCHIVELOG mode
+
+        Source databases must be in ARCHIVELOG so redo logs are archived (needed for consistent SnapSyncs and provisioning).
+        Block Change Tracking (BCT) – recommended
+
+        Speeds up incremental SnapSyncs; without BCT, SnapSync must scan the whole DB.
+        FORCE LOGGING – recommended
+
+        Prevents NOLOGGING operations from breaking consistency.
+        If NOLOGGING is used, take a new snapshot afterward to update the dSource.
+        Redo logs on RAW/ASM
+
+        If online redo logs are on RAW or ASM, LogSync works only in Archive‑Only mode.
+OS‑specific requirements (Solaris)
+        gtar must be installed on Solaris hosts
+        Delphix uses gtar to handle long file names when extracting the toolkit.
+        gtar needs to be in standard paths such as:
+        /bin:/usr
+        /bin:/sbin:/usr
+        /sbin:/usr/contrib
+        /bin:/usr/sfw
+        /bin:/opt/sfw
+        /bin:/opt/csw/bin
+
+addiional Target host requirements:
+        User/group and permissions
+
+        delphix_os must be a member of OSDBA (e.g. dba) so Delphix can create VDBs.
+        There must be a VDB mount directory (e.g. /mnt/provision/):
+        Owned by delphix_os and primary OS group (oinstall or dba).
+        Permissions at least -rwxrwx--- (0770).
+        No symlinks in its path (NFS can mount into a symlink path but cannot unmount).
+        Commands via sudo
+
+        Permission (typically via sudo) to run as super‑user:
+        mount, umount, mkdir, rmdir
+        pargs on Solaris
+        ps on Linux, AIX, HP‑UX
+        nfso on AIX
+        Optional write permissions
+
+        Optional write access to $ORACLE_BASE_CONFIG/dbs and $ORACLE_BASE_CONFIG/dbs/oranfstab:
+        Allows writing init files for easier manual VDB startup.
+        Allows modifying oranfstab to enable dNFS for VDB mounts.
+        Oracle listener
+
+        A listener process must be running on the target host.
+        Listener version must be ≥ the highest Oracle version used for VDBs.
+        NFS-related packages and services
+
+        Required packages on target hosts:
+        portmapper / rpcbind
+        status daemon (rpc.statd)
+        NFS lock manager (rpc.lockd / lockmgr)
+        Services must be running to support NFS client communication and file locking.
+        NFS is enabled by default; if NFSv4 isn’t fully configured, Delphix falls back to NFSv3.
+        Optional Datapatch permission
+
+        Optional permission to run $ORACLE_HOME/OPatch/datapatch as Oracle, if you need to invoke Datapatch with a user other than the Oracle OS user.
+
+General Outbound from the Delphix Engine Port Allocation:
+
+        TCP 25 – Connect to local SMTP server (sending email alerts).
+        TCP/UDP 53 – Connect to DNS servers (name resolution).
+        UDP 123 – Connect to NTP server (time synchronization).
+        UDP 162 – Send SNMP traps to an SNMP manager (monitoring/alerts).
+        TCP 443 – HTTPS to Delphix Support upload server (sending support bundles, etc.).
+        TCP/UDP 636 – Secure LDAP connections (directory/identity integration).
+        TCP 8415 – Connections to a Delphix replication target (Delphix Session Protocol).
+        TCP 50001 – Network performance test connections to source and target environments.
+
+Inbound to the Delphix Engine Port Allocation:
+
+        TCP 22 – SSH/SFTP connections from source, staging, and target database environments.
+        TCP 80 – HTTP connections to the Delphix GUI.
+        UDP 161 – SNMP messages from an SNMP manager to the Delphix Engine.
+        TCP 443 – HTTPS connections to the Delphix Management Application (web UI over TLS).
+        TCP 8415 – Delphix Session Protocol (DSP) connections for services like Replication, SnapSync for Oracle, V2P, and the Delphix Connector.
+        TCP 50001 – Network performance tests from source and target environments via the Delphix CLI.
+        TCP 54046 – Connections from source and target environments when encryption is enabled for Linux environments.
+
+Network and Connectivity Requirements for Oracle
+
+        •IP connections must exist between the Delphix Engine and the source and target environments.
+
+        •For source environments, Delphix Engine uses an SSH connection to each source host, an HTTP connection from each source environment to the Delphix Engine, and a DSP connection to the Delphix Engine. The Delphix Engine uses SQLNet connections to the DBMS on the source environment.
+
+        •For target environments, Delphix uses an SSH connection to each target environment and an NFS connection to the Delphix Engine. The Delphix Engine uses SQLNet connections to the virtual databases on the target environment.
+

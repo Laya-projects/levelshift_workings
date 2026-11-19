@@ -1,0 +1,142 @@
+Delphix Engine prerequisites for SQL Server:
+
+- **Supported platforms**
+  - A Delphix Engine deployed on a **supported hypervisor or cloud platform**, with enough:
+    - **CPU and RAM** (per sizing guidelines).  
+    - **Storage** for SQL Server dSources and VDBs (on SAN, iSCSI, or other supported storage).
+
+- **Connectivity to Windows/SQL hosts**
+  - Reliable IP connectivity from the Engine to all **source, staging, and target Windows hosts** on:
+    - **SQL Server ports** (default TCP 1433 or custom).  
+    - **SMB/file share ports** (e.g., TCP 445) if using network shares for backups/data.  
+    - Any **Delphix protocol ports** (e.g., TCP 8415 for DSP or connector communication).
+
+- **Windows Connector / host setup**
+  - A **Windows Connector** or equivalent Delphix integration installed and registered where required.  
+  - A **Windows account** with:
+    - Permissions to connect to SQL Server instances.  
+    - Access to backup locations and data directories.
+
+- **SQL Server configuration**
+  - SQL Server instances on supported **versions/editions** and **Windows OS** (per SQL Server Support Matrix).  
+  - Databases configured with **appropriate recovery models and backups** (usually FULL with regular full/diff/log backups) to support ingestion and point‑in‑time provisioning.
+
+- **Validation (HostChecker or equivalent)**
+  - Use Delphix validation tools (similar to HostChecker in the Oracle world) to confirm:
+    - Accounts, permissions, and connectivity are correct.  
+    - Required ports and services are reachable.
+
+In short: before using SQL Server with Delphix, you need a properly sized Engine, supported Windows + SQL Server versions, a connector/Windows account with the right permissions, and clean network paths between Engine and all SQL Server hosts.
+
+Connecting to the Delphix Continuous Data Engine :
+
+    It is mainly done through its web UI.
+
+    - **Web UI access**  
+    - Use the Engine’s **IP address or hostname** in a browser to reach the **Management Application** (main UI).  
+    - During initial setup, you can click **“setup”** under the login password box to open the **Server Setup** application.
+
+    - **Server Setup application**  
+    - From this UI you perform initial configuration:
+        - Choose Engine type (**Continuous Data** or **Continuous Compliance**).  
+        - Create **SYSADMIN** and **ADMIN** accounts with email addresses.  
+        - Run the **Setup Wizard** (NTP, network, security, storage, outbound connectivity, LDAP/SAML/SSO, authentication, register Engine).
+
+    - **Other access methods**  
+    - Administrators can also connect via **SSH** (for CLI/advanced tasks) using the Engine’s IP/hostname, subject to your environment’s access policies.
+
+Delphix and SQL Server database discovery:
+
+    - **Environment registration**  
+    - First, you add a **Windows/SQL Server environment** in the Delphix Engine (often via the Windows Connector).  
+    - You provide host details, SQL credentials, and any connector information.
+
+    - **Automatic discovery**  
+    - Delphix connects to the host/connector and **enumerates SQL Server instances** (default and named).  
+    - For each instance, it queries **system catalog views** to discover:
+        - Databases (names, sizes, states).  
+        - File locations (data/log files).  
+        - Backup history, depending on configuration.
+
+    - **Result in the UI**  
+    - Discovered databases appear in the Delphix UI as **candidates for dSources**.  
+    - From there, you can choose which databases to link as dSources, configure ingestion (backup-based, etc.), and start using them for VDB provisioning.
+
+    In short: once you register a SQL Server environment, Delphix automatically scans the instances and surfaces databases so you can select which ones to virtualize.
+
+    SQL Server environments setup:
+    1. **Add the Windows/SQL Server environment**  
+    - In the Delphix UI, you create a **new environment** for the Windows host.  
+    - Provide hostname/IP, Windows/SQL credentials, and (if used) **Windows Connector** details.
+
+    2. **Validate connectivity and permissions**  
+    - Delphix tests:
+        - Network connectivity to the host.  
+        - Ability to talk to SQL Server instances.  
+        - Access to backup locations or data directories.
+
+    3. **Discover SQL Server instances and databases**  
+    - Delphix automatically **enumerates instances** (default + named) and **discovers databases** using system catalog views.  
+    - These appear as candidates to be linked as **dSources**.
+
+    4. **Mark environment roles**  
+    - The environment can be marked as:
+        - **Source** (production or backup source).  
+        - **Staging** (for restoring backups before ingestion).  
+        - **Target** (where VDBs will run).
+
+    5. **Use environment for operations**  
+    - Once set up, you can:
+        - **Link dSources** from discovered databases.  
+        - **Provision VDBs** to target environments.  
+        - Manage refresh/rewind and policies from the Delphix UI/CLI.
+
+installing the Delphix Connector Service on target database servers (Windows/SQL Server):
+
+    - **1. Choose the target hosts**  
+    - Identify the **Windows servers** that will act as **source, staging, or target** environments for SQL Server.
+
+    - **2. Install the Connector software**  
+    - Log on to each target Windows server.  
+    - Run the **Delphix Connector installer** provided by Delphix.  
+    - During setup, specify:
+        - The **Windows service account** under which the connector will run.  
+        - Any required paths or configuration options.
+
+    - **3. Service account permissions**  
+    - Ensure the service account has:
+        - Rights to **connect to SQL Server instances** on that host.  
+        - Access to **backup directories and data/log file locations**.  
+        - Appropriate Windows privileges (read/execute in required folders).
+
+    - **4. Register the Connector with the Delphix Engine**  
+    - In the Delphix UI, add the Windows host as an **environment**.  
+    - Provide host/connector details (hostname/IP, connector port, credentials).  
+    - The Engine verifies communication with the connector service.
+
+    - **5. Verify and use**  
+    - Confirm the environment shows as **reachable** and instances/databases are discovered.  
+    - You can now **link dSources** and **provision VDBs** using that target server.
+
+validating target environments via HostChecker:
+
+    - **What HostChecker is**  
+    - A **standalone Java (.jar) tool** included in the Delphix Toolkit.  
+    - Runs on **source and target hosts** to verify they meet Delphix requirements before linking dSources or provisioning VDBs.
+
+    - **How it’s used for targets**  
+    - You run HostChecker on each **target host** (Oracle or SQL Server) that will host VDBs.  
+    - It checks:
+        - Presence and permissions of the **Delphix OS user** (`delphix_os`).  
+        - Toolkit directory ownership/space and required **.so libraries**.  
+        - Sudo/privilege setup for commands like `mount`, `umount`, `mkdir`, `rmdir`, `ps`, etc.  
+        - Network and NFS-related configuration needed for VDB mounts.
+
+    - **Output and actions**  
+    - HostChecker reports **pass/warn/fail** for each test.  
+    - You fix any warnings/failures (permissions, missing files, misconfigured sudo) and rerun until the target environment passes.  
+
+    In short: HostChecker is your “pre-flight check” to ensure a target host is correctly configured before Delphix starts provisioning VDBs there.
+
+
+

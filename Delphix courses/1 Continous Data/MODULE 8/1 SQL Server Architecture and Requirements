@@ -1,0 +1,487 @@
+SQL Server is Microsoft’s relational database which is typically run on Windows Server hosts. With Delphix, you can use various SQL Server configurations, ranging from standalone instances to Failover Clusters to Availability Groups
+
+Architecture concepts (same pattern as Oracle)
+
+Environment: Windows host or cluster where SQL Server is installed (source, staging, or target).
+dSource: Delphix-managed copy of a SQL Server database created from backups or direct ingestion.
+VDB: Virtual database provisioned from a dSource (or another VDB) onto a target SQL Server instance.
+Source environment requirements (SQL Server)
+
+A Windows host with supported SQL Server version/edition (per the Delphix SQL Server support matrix).
+A dedicated Delphix OS/Windows account with:
+Permissions to access SQL Server binaries and database files/backups.
+Rights to run backup/restore operations or read existing backups.
+Access to SQL Server tools (sqlcmd, backup/restore mechanisms) and necessary drivers/libraries.
+Database requirements
+
+Databases should be configured so that:
+Backups (full + differential/log) are regularly taken and accessible to Delphix (if using backup-based ingestion).
+Recovery model (usually FULL) supports log shipping and point-in-time recovery where needed.
+For AlwaysOn / clustering scenarios, shared configuration and permissions must allow Delphix to see all needed replicas/nodes.
+Target environment requirements
+
+SQL Server instance with compatible version/edition.
+Directory structure and NTFS volumes where Delphix can present VDB files (often via network shares or specific mount points).
+
+Permissions for the Delphix account to:
+Attach/detach databases.
+Create, start, stop VDBs and manage log files.
+Network and connectivity
+
+Connectivity from the Delphix Engine to SQL Server hosts on:
+SQL Server port (default TCP 1433 or custom).
+Windows/SMB/fileshare ports if backups or data files are accessed over the network.
+Firewalls and security policies must allow:
+Engine → source/target SQL Server communication.
+Any required replication or backup traffic.
+In essence: SQL Server requirements mirror the Oracle pattern—supported versions, a properly privileged Delphix account, backup/recovery configuration that supports ingestion, and network/host settings that let Delphix see and manage databases and storage.
+
+Delphix OVA:
+
+    It’s a preconfigured VM image (OVA) provided by Delphix that includes required OS and Engine settings.
+    When deployed, it creates a VM with one 300 GB disk, 8 vCPUs, and 64 GB RAM minimum (128 GB recommended), assuming redundant SAN storage underneath.
+    You must use this Delphix-supplied OVA to install the Engine on VMware, and you download it using Delphix support credentials/welcome letter.
+    After deployment, you add extra data disks sized to match your source databases (e.g., four 1 TB VMDKs for a 4 TB source).
+
+Hypervisor Platforms:
+    Hypervisor platforms are the virtualization layers on which you deploy the Delphix Engine as a virtual machine.
+
+
+    A hypervisor lets you run multiple virtual machines on a single physical server (e.g., VMware ESXi, Hyper‑V, KVM).
+    Delphix provides different images for different hypervisors:
+    OVA for VMware.
+    AMI for cloud platforms like AWS (and similar images for other clouds).
+    The choice of hypervisor affects:
+    How you deploy the Engine VM (import OVA, launch AMI, etc.).
+    How you allocate CPU, RAM, and storage to the Delphix Engine.
+
+“Hypervisor Platforms” mainly means the supported virtualization environments where you can host the Delphix Continuous Data Engine.
+
+
+
+SQL Server Source Host Environment Requirements:
+
+    Supported SQL Server & OS
+
+        The source host must run a supported SQL Server version/edition on a supported Windows OS (per the Delphix SQL Server support matrix).
+        Delphix account on the host
+
+    A dedicated Windows/Delphix user with permissions to:
+        Connect to SQL Server instances.
+        Run backup/restore operations or access existing backups.
+        Read database files/backup locations as needed.
+
+    Backup and recovery configuration:
+
+        Databases typically in FULL recovery model so full, differential, and log backups are available for ingestion and point‑in‑time recovery.
+    
+    Tools and connectivity:
+
+        Access to required SQL Server tools (e.g., sqlcmd, backup utilities).
+        Network connectivity from the Delphix Engine to the source host on:
+        SQL Server port (default 1433 or custom).
+        Any file share/SMB paths used for backups or data files.
+
+    Cluster/HA considerations:
+
+        For AlwaysOn or clustered environments, all participating nodes must have consistent configuration and permissions so Delphix can discover and use them.
+
+
+iSCSI Requirements(Internet Small Computer Systems Interface):
+    Supported storage
+
+    The iSCSI storage array must be supported by your hypervisor/OS (e.g., VMware ESXi, Windows), since Delphix uses whatever block devices the hypervisor presents.
+
+    Network configuration
+
+    A dedicated storage network (or VLAN) is recommended for iSCSI traffic.
+    Ensure sufficient bandwidth and low latency, and configure MTU/Jumbo frames consistently if used.
+    Firewalls must allow iSCSI ports (typically TCP 3260) between hosts and storage.
+
+    Host setup
+
+    iSCSI initiators must be configured on hypervisor/hosts, with:
+    Correct target IPs, authentication (CHAP, etc.), and LUN mappings.
+    Proper multipathing (MPIO) and failover settings for resilience.
+
+    Delphix VM storage layout
+
+    Present iSCSI LUNs to the hypervisor and then to the Delphix Engine VM as data disks.
+
+    Size and number of iSCSI LUNs must support:
+    dSource storage (ingested databases).
+    VDB storage (virtual databases and logs).
+
+    In practice: iSCSI just needs to be solid, well‑configured shared block storage that your hypervisor trusts—the Delphix Engine then uses these LUNs like any other VM disks.
+
+
+Windows Connector Requirements:
+
+
+    Supported OS and .NET
+
+    The Windows host where the connector runs must be on a supported Windows version with required .NET Framework installed (per Delphix docs).
+    Service account
+
+    The connector runs under a Windows service account that must have:
+    Permissions to connect to SQL Server instances.
+    Access to database files/backups and relevant directories.
+    Rights to run needed commands (backup/restore, querying DB metadata).
+    Network connectivity
+
+    The host must be reachable from the Delphix Engine over:
+    TCP 8415 (Delphix Session Protocol, if used by the connector).
+    SQL Server port (default 1433 or custom) for database communication.
+    Any SMB/file share ports if backups are on shares.
+    Installation and configuration
+
+    The Windows Connector software must be installed on the host and registered to the Delphix Engine.
+    Correct hostname/IP, credentials, and permissions must be configured so the Engine can use it to discover SQL Server instances and manage ingestion/provisioning.
+
+
+SQL Server Support Matrix:
+
+- **Purpose**  
+  - It’s Delphix’s official **compatibility list** for SQL Server: which **versions, editions, and OS combinations** are supported.
+
+- **What it covers**  
+  - Supported **SQL Server versions** (e.g., 2012, 2014, 2016, 2017, 2019, etc.).  
+  - Supported **editions** (Enterprise, Standard, sometimes Developer) for use as source/target.  
+  - Supported **Windows operating systems** for those SQL Server versions.  
+  - Any special notes for **clustered / AlwaysOn** environments and features.
+
+- **How you use it**  
+  - Before onboarding a SQL Server host, you check the matrix to confirm:
+    - The **SQL Server version and edition** are supported.  
+    - The **Windows OS** matches Delphix support.  
+  - This reduces risk of ingest/provision issues due to unsupported combinations.
+
+In other words: the SQL Server Support Matrix is the reference that tells you which SQL Server setups Delphix Continuous Data officially works with.
+
+
+Delphix Architecture for SQL Server:
+
+    Core objects (same pattern as Oracle):
+
+        Environment: A Windows host or cluster where SQL Server runs; can be marked as source, staging, or target.
+        dSource: A Delphix‑managed copy of a SQL Server database created from backups or direct ingestion; it’s the “golden copy” Delphix keeps in sync.
+        VDB (virtual database): A space‑efficient, copy‑on‑write virtual SQL Server database provisioned from a dSource (or another VDB) onto a target environment.
+        Source ingestion options
+
+    Delphix can ingest from:
+        Native SQL Server backups (full + differential/log).
+        Sometimes direct access to data/log files, depending on configuration.
+        Snapshots (and optionally log chains) are stored in Delphix and used for point‑in‑time provisioning.
+        Target provisioning
+
+        On a target SQL Server host, Delphix presents data via network storage / filesystems, then attaches the database as a VDB.
+        Many VDBs can share the same underlying dSource data, with changes stored separately (copy‑on‑write).
+        Management & policies
+
+    The Delphix Engine manages:
+        Snapshot schedules and retention.
+        Refresh, rewind, disable, and delete operations for SQL Server VDBs.
+        All of this is driven from the Delphix UI and CLI, while SQL Server continues to see standard databases on Windows hosts.
+
+Hypervisor Platforms:
+
+    Hypervisor platforms are the virtualization systems on which you run the Delphix Engine as a virtual machine.
+
+        A hypervisor lets you host VMs on a physical server (examples: VMware ESXi, Microsoft Hyper‑V, KVM, cloud hypervisors).
+        Delphix provides different images per hypervisor:
+        OVA for VMware.
+        AMI (and equivalents) for cloud platforms.
+        Your choice of hypervisor determines how you:
+        Deploy the Delphix Engine VM.
+        Allocate CPU, RAM, and storage to the Engine.
+
+
+SQL Server Source Host Environment Requirements:
+
+Supported platform
+
+Windows host running a supported SQL Server version/edition (per the SQL Server support matrix).
+Delphix Windows account
+
+A service/account with rights to:
+
+Connect to SQL Server instances.
+Run backup/restore or read existing backups.
+Access backup locations and any required data directories.
+Database/backup configuration
+
+Databases typically in FULL recovery model.
+Regular full, differential, and log backups available and accessible to Delphix (if using backup-based ingestion).
+Tools and connectivity
+
+Required SQL Server tools installed (e.g., sqlcmd, backup utilities).
+
+Network connectivity from Delphix Engine to the host on:
+SQL Server port (default 1433 or configured port).
+Any SMB/file share ports used for backup storage.
+Cluster/HA considerations
+
+For AlwaysOn / clustered setups, all nodes must have consistent configuration and permissions so Delphix can discover and use them.
+
+iSCSI Requirements:
+
+Supported storage and host
+
+iSCSI LUNs must be supported by your hypervisor/OS (e.g., VMware ESXi, Windows), since Delphix sees them as VM disks.
+
+Network setup
+
+Reliable IP network between hosts and iSCSI targets.
+Firewalls must allow TCP 3260 and any vendor‑specific ports.
+Prefer a dedicated storage network/VLAN with enough bandwidth and low latency.
+
+Host configuration
+
+iSCSI initiator configured with:
+Correct target IPs, authentication (e.g., CHAP), and LUN mappings.
+Proper multipathing (MPIO) for redundancy and performance.
+
+Delphix Engine VM storage
+
+Present iSCSI LUNs to the hypervisor and then to the Delphix Engine VM as data disks.
+Size and number of LUNs must support both dSource and VDB storage needs.
+
+Windows Connector Requirements:
+
+Supported Windows and prerequisites
+
+    Runs on a supported Windows OS with required .NET Framework installed (per Delphix docs).
+    Service account
+
+Uses a Windows account that must have:
+    Permissions to connect to SQL Server instances.
+    Access to database files and backup locations.
+    Rights to run needed commands for discovery and ingestion.
+    Network connectivity
+
+The connector host must be reachable from the Delphix Engine over:
+    The configured Delphix protocol port (commonly DSP on TCP 8415).
+    SQL Server port (default 1433 or custom) for DB connections.
+    Any SMB/file share ports if backups are on shares.
+    Installation and registration
+
+Windows Connector software must be installed on the host and registered with the Delphix Engine using correct hostname/IP and credentials.
+Host (environment) requirements
+    Supported platform:Windows hosts running supported SQL Server versions/editions (per the SQL Server support matrix).
+    Delphix account on the host:A Windows service/account with permissions to:
+        Connect to SQL Server instances.
+        Run backup/restore or read existing backups.
+        Access required directories and file shares.
+        Connectivity & tools
+    Network access from the Delphix Engine to:
+        SQL Server port (default 1433 or custom).
+        SMB/file share ports if backups or datafiles are on network shares.
+        Required SQL Server tools (e.g., sqlcmd, backup utilities) installed and usable.
+Database requirements
+    Recovery model and backups
+        Databases typically in FULL recovery model so that:
+            Full, differential, and transaction log backups exist and can be ingested.
+            Point‑in‑time recovery and provisioning are possible.
+    Backup accessibility
+        Backup files must be:
+            Stored on locations accessible to the Delphix Engine/connector.
+            Consistently named and scheduled (for reliable ingestion).
+        Cluster / HA setups
+            For AlwaysOn Availability Groups or clusters:
+                All participating nodes must be configured consistently.
+                Delphix must be able to see and connect to the relevant replica/instance.
+
+In short: you need supported Windows + SQL Server, a properly privileged Delphix account, correct recovery/backup configuration, and reliable network/storage access to those backups and databases.
+
+
+Environment Operating System Compatibility:
+
+    Environment Operating System Compatibility is about making sure the OS on your source, staging, and target hosts is officially supported by Delphix for the database platform you’re using.
+
+    - For **Oracle**:  
+    - Delphix supports specific versions of **RHEL, SLES, Solaris (SPARC/x86), HP‑UX, and AIX**, matched with supported Oracle versions (defined in the Oracle Support Matrix).  
+
+    - For **SQL Server**:  
+    - Delphix supports certain **Windows Server versions** with specific SQL Server versions/editions (defined in the SQL Server Support Matrix).
+
+    - Why it matters:  
+    - Only supported OS + DB combinations are guaranteed to work for:  
+        - Environment discovery (Oracle homes, SQL instances).  
+        - Toolkit deployment and HostChecker.  
+        - dSource ingestion and VDB/vPDB provisioning.
+
+    In practice: before onboarding any host as a Delphix environment, you check the relevant **support matrix** to confirm that its OS and database version/edition are compatible.
+
+Source Database Login Requirements:
+
+    Source Database Login Requirements describe what kind of database account Delphix needs on each source database.
+
+    - **Oracle**  
+    - A **DB user** with **read‑only access to data dictionary views** (e.g., `DBA_*`, `ALL_*` views).  
+    - Credentials must work for **local (BEQ) and/or SQL*Net** connections from the Delphix Engine.  
+    - Used for:
+        - Discovering databases and metadata.  
+        - Validating configuration and running ingestion operations (RMAN/log checks).
+
+    - **SQL Server**  
+    - A SQL Server login (often mapped to a Windows account used by the connector) with at least:  
+        - Permissions to query **system catalog views** (databases, files, backup history).  
+        - Rights to run **backup/restore** or read existing backup information, depending on ingestion method.
+
+    In essence: Delphix needs a **non‑privileged, read‑focused database account** that can see metadata and backups, not full DBA rights, but enough to manage dSource creation and verification.
+
+Windows User Requirements for Staging Environment:
+
+- **Staging Windows account**  
+  - A dedicated Windows user (often the same account used for source/connector) that can:
+    - Run the **staging SQL Server instance** (service account or with rights to it).  
+    - Access **backup locations** (full/diff/log backups from production).  
+    - Read/write to the **staging data/log file directories**.
+
+- **SQL Server permissions**  
+  - On the staging instance, the account must be able to:
+    - **Restore databases** from production backups.  
+    - Query database and backup metadata (catalog views).  
+
+- **Delphix/connector permissions**  
+  - If you use the Windows Connector, its service account must:
+    - Reach the staging instance over the SQL Server port.  
+    - Access any file shares used for staging DB files or backups.
+
+In short: the Windows user for staging must be able to restore and manage the staging copy of the production DB and read all backups that Delphix relies on.
+
+
+Staging Database Login Requirements:
+
+- **Purpose of the staging login**  
+  - It’s the **database account** Delphix uses to connect to the **staging database instance**, not production.
+
+- **Permissions for Oracle (staging DB)**  
+  - Read access to **data dictionary views** (similar to the source DB login).  
+  - Ability to **run recovery/restore operations** on the staging database (apply backups, archive logs) as required by the ingestion method.  
+
+- **Permissions for SQL Server (staging DB)**  
+  - Rights to **restore databases** from production backups onto the staging instance.  
+  - Read access to system catalog views (databases, files, backup history) to let Delphix validate and discover the restored DB.  
+
+In essence: the staging DB login must be able to **restore and inspect** the staging copy of production, but it doesn’t need broader application-level privileges.
+
+
+Target Host Requirements:
+
+- **User and directory for VDB mounts**
+  - `delphix_os` must be in the **OSDBA** group (e.g., `dba`) so Delphix can create VDBs.
+  - A directory such as `/mnt/provision/` must exist to hold **NFS mount points** for VDBs:
+    - Owned by `delphix_os` and the primary OS group (`oinstall` or `dba`).
+    - Permissions at least `-rwxrwx---` (`0770`).
+    - **No symlinks** in the directory path (NFS can’t reliably unmount through symlinks).
+
+- **Required sudo commands**
+  - Ability (usually via sudo) to run as super‑user:
+    - `mount`, `umount`, `mkdir`, `rmdir`
+    - `pargs` on Solaris
+    - `ps` on Linux, AIX, HP‑UX
+    - `nfso` on AIX
+
+- **Optional write permissions**
+  - Optional write access to:
+    - `$ORACLE_BASE_CONFIG/dbs` – to drop init files for easier manual VDB startup.
+    - `$ORACLE_BASE_CONFIG/dbs/oranfstab` – to enable **dNFS** for VDB mounts during provisioning/refresh.
+
+- **Oracle listener**
+  - An **Oracle listener** must be running on the target host.
+  - Listener version must be **≥ the highest Oracle version** used for VDBs.
+
+- **NFS packages and services**
+  - Target host must have:
+    1. **portmapper / rpcbind**
+    2. **rpc.statd** (status daemon)
+    3. **rpc.lockd / lockmgr** (NFS lock manager)
+  - Services must be running to support NFS client communication and file locking.
+  - NFS is enabled by default; if NFSv4 isn’t fully configured, Delphix falls back to **NFSv3**.
+
+- **Optional Datapatch permission**
+  - Optional permission to run `$ORACLE_HOME/OPatch/datapatch` as Oracle if you need to invoke Datapatch using a user other than the Oracle owner.
+
+Target Windows User Requirements:
+
+- **Service/Delphix account on the target host**
+  - A Windows user (often the same Delphix/connector account) that can:
+    - Connect to the **target SQL Server instance**.
+    - Attach/detach databases and manage VDB files.
+    - Read/write to the **data and log directories** used for VDBs.
+
+- **SQL Server permissions**
+  - On the target instance, the account needs rights to:
+    - **Create and alter databases** (for attaching VDBs).  
+    - Manage **file locations** (data/log files for the VDB).  
+
+- **File system and share access**
+  - The user must have:
+    - NTFS permissions on the **volumes/directories** where VDB files will reside.  
+    - Access to any **network shares** used for VDB storage (if applicable).
+
+In short: the target Windows user must be able to **run the SQL Server VDBs and manage their files**, with suitable SQL and filesystem privileges.
+
+
+Target Database Login Requirements:
+
+- **Service/Delphix account on the target host**
+  - A Windows user (often the same Delphix/connector account) that can:
+    - Connect to the **target SQL Server instance**.
+    - Attach/detach databases and manage VDB files.
+    - Read/write to the **data and log directories** used for VDBs.
+
+- **SQL Server permissions**
+  - On the target instance, the account needs rights to:
+    - **Create and alter databases** (for attaching VDBs).  
+    - Manage **file locations** (data/log files for the VDB).  
+
+- **File system and share access**
+  - The user must have:
+    - NTFS permissions on the **volumes/directories** where VDB files will reside.  
+    - Access to any **network shares** used for VDB storage (if applicable).
+
+In short: the target Windows user must be able to **run the SQL Server VDBs and manage their files**, with suitable SQL and filesystem privileges.
+
+
+Network and Connectivity Requirements for SQL Server Environments:
+
+- **Engine ↔ SQL Server hosts**
+  - The Delphix Engine must reach **source, staging, and target Windows hosts** over:
+    - The **SQL Server port** (default TCP 1433 or your custom port) for DB connections.
+    - Any **SMB/file share ports** (TCP 445, etc.) used for accessing backup files or data directories.
+  - DNS must resolve hostnames correctly; time should be in sync (NTP) to avoid backup/log chain issues.
+
+- **Engine ↔ Windows Connector (if used)**
+  - The Engine must connect to the **Windows Connector** host over:
+    - The configured **Delphix protocol port** (commonly DSP on TCP 8415).  
+    - Standard Windows ports for control and data transfer as defined in the connector setup.
+
+- **Firewall and security rules**
+  - Firewalls must allow:
+    - Delphix Engine → SQL Server and connector traffic (SQL, DSP, SMB).  
+    - Any necessary return traffic from hosts back to the Engine.
+  - IDS/monitoring tools should be configured to tolerate **high‑volume data transfer** during backup ingestion or VDB operations.
+
+In short: you need reliable, bidirectional IP connectivity between the Delphix Engine and all SQL Server/Windows hosts on the SQL, SMB, and Delphix protocol ports, with firewalls and security tools configured not to block or throttle this traffic.
+
+AppData Port Requirements:
+
+    Firewalls and Intrusion Detection Systems (IDS):
+
+        - **Firewalls between Engine and hosts**
+        - Source (production) environments are often separated from non‑prod by firewalls.  
+        - Firewalls add **latency**, which can affect Delphix performance.  
+        - For best performance, there should ideally be **no firewalls** between the **Delphix Engine and VDB target environments**.  
+        - If a firewall exists between the Engine and a **source environment**, it must allow all required **Delphix ports and protocols** (SSH, SQL*Net/SQL Server, NFS, DSP, etc.).
+
+        - **IDS considerations**
+        - IDSs must be configured to **permit Delphix traffic**, not flag it as suspicious.  
+        - They should be aware of and allow the **high data volumes** expected between dSources and the Delphix Engine (backup ingestion, SnapSync, LogSync, replication).  
+
+        In essence: firewalls and IDS must be tuned so they don’t block, throttle, or alarm on normal Delphix data flows, especially between Engine and source/target hosts.
+
+
+
+

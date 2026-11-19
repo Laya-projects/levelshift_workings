@@ -1,0 +1,74 @@
+
+Linking a Pluggable Database (PDB):
+
+    In an Oracle multitenant setup, a PDB lives inside a CDB (Container Database).
+
+    To link a PDB, you first register the CDB environment (host, Oracle home, CDB instance) in Delphix.
+
+    In the Delphix UI, you then choose Add dSource, select the specific PDB within the CDB, and provide:
+
+    Credentials and connection details for that PDB.
+    Ingestion options (Source‑Based or Staging Push, LogSync, policies, etc.).
+
+    Delphix performs an initial ingest of the PDB’s data and creates a PDB dSource, which you can later use to:
+        Provision PDB‑level VDBs (virtual PDBs).
+        Refresh/rewind them independently of other PDBs in the same CDB.
+
+
+Provisioning a Virtual PDB (vPDB):
+
+    Provisioning a Virtual PDB (vPDB) is the multitenant version of provisioning a VDB, but at the **PDB level** instead of the whole CDB.
+
+
+    - You start from a **PDB dSource** (linked from a specific PDB in a CDB) and choose **Provision** in the Delphix UI.  
+    - You select the **snapshot or point in time** for that PDB and choose a **target CDB environment** where the vPDB will live.  
+    - You provide vPDB details: **PDB name**, target CDB/Oracle home, listener, and NFS mount directory.  
+    - Delphix exposes the PDB’s data over **NFS**, creates the **virtual PDB** inside the target CDB, and opens it.  
+    - The vPDB behaves like a normal PDB (you can connect, test, modify) but you can still **refresh, rewind, disable, or delete** it via Delphix.
+
+what is CDB?
+    A CDB is a Container Database in Oracle’s multitenant architecture.
+
+    So: CDB = main container; PDBs = individual “tenant” databases living inside that container.
+
+
+vPDB Operations Done Via the CLI:
+
+    You can manage a virtual PDB (vPDB) through the same CLI framework used for VDBs, but targeting the PDB objects.
+    Typical vPDB operations via CLI include:
+    Provision a new vPDB from a PDB dSource or snapshot.
+    Refresh a vPDB to a newer snapshot/point in time.
+    Rewind/Rollback a vPDB to an earlier snapshot.
+    Enable/Disable a vPDB (mount/unmount and open/close it in the target CDB).
+    Delete a vPDB when it’s no longer needed.
+    You choose the vPDB object in the CLI tree (database/provisioning objects), then run the corresponding operations with the required parameters (target CDB, snapshot, credentials, etc.).
+
+
+Configuring Delphix Continuous Data Engine Replication:
+
+    Configuring Delphix Continuous Data Engine replication is about setting up one Engine as a **replication source** and another as a **replication target**, so objects (dSources, VDBs, etc.) are copied between them.
+    - **Prepare both Engines**
+    - Ensure **network connectivity** between the two Engines (TCP 8415 for DSP, plus 443 if using HTTPS for management).
+    - Make sure DNS, time (NTP), and firewall rules allow traffic between source and target Engines.
+
+    - **Configure the target Engine**
+    - In the target Engine UI, create a **Replication Target definition** (it’s ready to receive replicated objects).
+    - Set any **storage and retention** policies appropriate for replicated data.
+
+    - **Configure the source Engine**
+    - In the source Engine UI, create a **Replication Profile**:
+        - Specify the **target Engine** (hostname/IP, credentials).  
+        - Choose what to replicate (specific **dSources**, **VDBs**, groups, or the whole dataset).  
+        - Define **schedule and retention** (how often replication runs, how many versions to keep).
+
+    - **Run and monitor replication**
+    - Start replication manually or let the **schedule** run automatically.  
+    - Monitor **replication jobs** for success, bandwidth, and space usage on the target.  
+    - On the target Engine, replicated objects appear and can be **activated or used for DR** (e.g., provisioning VDBs from replicated dSources).
+
+
+
+
+
+
+
